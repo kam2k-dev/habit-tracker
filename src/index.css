@@ -1,0 +1,505 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 220 15% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 20%;
+    --primary: 220 15% 25%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 210 15% 95%;
+    --secondary-foreground: 220 15% 25%;
+    --muted: 210 15% 95%;
+    --muted-foreground: 220 10% 50%;
+    --accent: 210 15% 95%;
+    --accent-foreground: 220 15% 25%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 10% 90%;
+    --input: 220 10% 90%;
+    --ring: 220 15% 25%;
+    --radius: 0.75rem;
+
+    /* Custom colors for habit tracker */
+    --good-habit: 145 55% 45%;
+    --good-habit-light: 145 55% 92%;
+    --bad-habit: 0 65% 55%;
+    --bad-habit-light: 0 65% 95%;
+    --neutral-habit: 220 15% 75%;
+  }
+
+  .dark {
+    --background: 220 20% 10%;
+    --foreground: 210 15% 95%;
+    --card: 220 20% 13%;
+    --card-foreground: 210 15% 95%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 210 15% 95%;
+    --primary: 210 15% 90%;
+    --primary-foreground: 220 20% 10%;
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 210 15% 90%;
+    --muted: 220 15% 20%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 220 15% 20%;
+    --accent-foreground: 210 15% 90%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 15% 25%;
+    --input: 220 15% 25%;
+    --ring: 210 15% 80%;
+
+    /* Custom colors for habit tracker - dark mode */
+    --good-habit: 145 50% 50%;
+    --good-habit-light: 145 30% 20%;
+    --bad-habit: 0 60% 60%;
+    --bad-habit-light: 0 30% 20%;
+    --neutral-habit: 220 15% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer utilities {
+  .habit-good {
+    background-color: hsl(var(--good-habit));
+  }
+  .habit-good-light {
+    background-color: hsl(var(--good-habit-light));
+  }
+  .habit-bad {
+    background-color: hsl(var(--bad-habit));
+  }
+  .habit-bad-light {
+    background-color: hsl(var(--bad-habit-light));
+  }
+  .habit-neutral {
+    background-color: hsl(var(--neutral-habit));
+  }
+}
+
+/* Custom scrollbar - show only on hover/grab */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+/* Show scrollbar on container hover or when dragging */
+.scrollbar-hover::-webkit-scrollbar-thumb,
+:hover::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* Firefox scrollbar */
+.scrollbar-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-hover:hover,
+.scrollbar-hover.dragging {
+  scrollbar-color: hsl(var(--muted-foreground) / 0.4) transparent;
+}
+
+/* Grab cursor for drag scrolling */
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grab:active {
+  cursor: grabbing;
+}
+
+/* Contribution graph cell animations */
+.contribution-cell {
+  transition: all 0.2s ease;
+}
+
+.contribution-cell:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+/* Habit card fade out animation when completed - with delay */
+@keyframes fadeOutSlide {
+  0%, 40% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02) translateX(3px);
+  }
+  70% {
+    opacity: 0.5;
+    transform: scale(0.98) translateX(-5px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateX(-30px);
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.animate-fade-out-scale {
+  animation: fadeOutSlide 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.3s;
+  pointer-events: none;
+}
+
+/* Drag and drop styles */
+.habit-card[draggable="true"] {
+  cursor: grab;
+}
+
+.habit-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* iOS-style spring dragging animation */
+@keyframes dragLiftIOS {
+  0% {
+    transform: scale(1) translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  40% {
+    transform: scale(1.05) translateY(-4px);
+  }
+  100% {
+    transform: scale(1.03) translateY(-2px);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.15),
+      0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes dragSettle {
+  0% {
+    transform: scale(1.03) translateY(-2px);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.15),
+      0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  60% {
+    transform: scale(0.98) translateY(1px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.habit-card.dragging {
+  animation: dragLiftIOS 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0.95;
+  z-index: 100;
+}
+
+.habit-card:not(.dragging) {
+  animation: dragSettle 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* iOS-style list reorder spring animation */
+@keyframes listReorderSpring {
+  0% {
+    transform: translateY(var(--reorder-offset, 0)) scale(1);
+  }
+  40% {
+    transform: translateY(calc(var(--reorder-offset, 0) * 1.1)) scale(1.01);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.habit-card.reordering {
+  animation: listReorderSpring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Drag over indicator with iOS-style */
+@keyframes dragOverPulse {
+  0%, 100% {
+    border-top-color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.05);
+    transform: scaleX(1);
+  }
+  50% {
+    border-top-color: hsl(var(--primary) / 0.5);
+    background: hsl(var(--primary) / 0.1);
+    transform: scaleX(1.02);
+  }
+}
+
+.habit-card.drag-over {
+  border-top: 3px solid hsl(var(--primary));
+  animation: dragOverPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform: translateY(4px);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Smooth transitions */
+.habit-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.habit-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced checkbox animation with iOS-style tap */
+@keyframes checkPop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes checkRipple {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 0.4;
+  }
+  100% {
+    box-shadow: 0 0 0 20px currentColor;
+    opacity: 0;
+  }
+}
+
+@keyframes tapBounce {
+  0% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.habit-checkbox {
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.habit-checkbox:active {
+  transform: scale(0.85);
+}
+
+.habit-checkbox[data-state="checked"] {
+  animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.habit-checkbox[data-state="checked"]:after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  animation: checkRipple 0.5s ease-out;
+  pointer-events: none;
+}
+
+/* Card tap animation */
+.habit-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.habit-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.habit-card.tapping {
+  animation: tapBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Ripple effect for card */
+@keyframes cardRipple {
+  0% {
+    transform: scale(0);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.habit-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.habit-card:active::before {
+  animation: cardRipple 0.4s ease-out;
+}
+
+/* Checkbox animation */
+.habit-checkbox {
+  transition: all 0.15s ease;
+}
+
+.habit-checkbox:checked {
+  transform: scale(1.05);
+}
+
+/* Popup fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInPage 0.5s ease-out;
+}
+
+/* Popup bounce-in animation */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-20px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) translateY(0);
+  }
+  70% {
+    transform: scale(0.9) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Popup background pulse */
+@keyframes popupPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.15;
+  }
+}
+
+.animate-pulse {
+  animation: popupPulse 3s ease-in-out infinite;
+}
+
+.animate-pulse.delay-150 {
+  animation-delay: 0.15s;
+}
+
+/* Loading dots animation */
+@keyframes loading {
+  0% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+/* Spinner animation */
+@keyframes fade-spin {
+  0% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-spin {
+  animation: fade-spin 1.2s linear infinite;
+}
+
+.animate-loading {
+  animation: loading 1.4s linear infinite;
+}
+
+.bg-gray-900 {
+  background-color: hsl(var(--foreground));
+}
+
+/* Dark mode support for loading dots */
+.dark .bg-gray-900 {
+  background-color: hsl(var(--foreground));
+}
