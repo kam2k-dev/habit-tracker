@@ -51,7 +51,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
         >
           <div className="w-[42px] h-[42px] mr-2 md:mr-3 flex items-center justify-center overflow-hidden rounded-full">
             <img 
-              src="/favicon.webp" 
+              src="/logo.webp" 
               alt="Habit Tracker" 
               className="w-[42px] h-[42px] rounded-full object-cover"
             />
@@ -160,7 +160,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                   transition={{ delay: 0.1 }}
                   className="flex items-center justify-between mb-2"
                 >
-                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                     <Avatar className="w-14 h-14 border border-white dark:border-gray-700 overflow-hidden">
                       {user.photoURL ? (
                         <AvatarImage
@@ -169,7 +169,13 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                           referrerPolicy="no-referrer"
                           className="object-cover"
                         />
-                      ) : null}
+                      ) : (
+                        <AvatarImage
+                          src="/logo.webp"
+                          alt="Logo"
+                          className="object-cover opacity-50"
+                        />
+                      )}
                       <AvatarFallback className="bg-muted flex items-center justify-center">
                         <User className="h-7 w-7 text-muted-foreground" />
                       </AvatarFallback>
@@ -220,7 +226,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                       onClick={() => {
-                        onLogout()
+                        if (onRequestSignIn) onRequestSignIn();
                         toggleMenu()
                       }}
                       className="flex items-center gap-3 p-3 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors text-left font-semibold justify-center"

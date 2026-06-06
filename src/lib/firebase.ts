@@ -29,10 +29,8 @@ try {
   const existingApps = getApps();
   if (existingApps.length > 0) {
     app = existingApps[0];
-    console.log('Using existing Firebase app');
   } else {
     app = initializeApp(firebaseConfig);
-    console.log('Firebase initialized successfully');
   }
 } catch (error: any) {
   console.error('Firebase initialization error:', error.message || error);

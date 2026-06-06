@@ -816,7 +816,6 @@ function App() {
       <FloatingBottomNav
         activeTab={activeTab}
         onTabChange={(tab) => {
-          console.log(`Tab changed to: ${tab}`);
           setActiveTab(tab);
         }}
         onAddClick={() => {

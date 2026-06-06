@@ -81,7 +81,7 @@ export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodC
               whileTap={{ scale: 0.98 }}
               className="relative flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100/90 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-900/30 shadow-sm"
             >
-              <svg className="absolute inset-1 w-auto h-auto -rotate-90" viewBox="0 0 48 48" aria-hidden="true">
+              <svg className="absolute inset-0 w-full h-full p-[2px] -rotate-90" viewBox="0 0 48 48" aria-hidden="true">
                 <circle
                   cx="24"
                   cy="24"

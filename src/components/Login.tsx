@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingDots } from '@/components/ui/loading-dots';
-import { ArrowLeft, ArrowRight, Lock, LogOut, Mail, User, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Lock, LogOut, Mail, User, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 type AuthView = 'landing' | 'login' | 'register' | 'forgot';
@@ -24,12 +24,14 @@ export function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resetForm = () => {
     setName('');
     setEmail('');
     setPassword('');
+    setShowPassword(false);
   };
 
   const goTo = (nextView: AuthView) => {
@@ -39,7 +41,6 @@ export function Login() {
 
   const handleGoogleSignIn = async () => {
     setIsSubmitting(true);
-    console.log('Initiating Google Sign-In...');
     try {
       await signInWithGoogle();
       toast.success('Berhasil masuk dengan Google!');
@@ -54,22 +55,18 @@ export function Login() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
-    console.log('Form submitted for view:', view);
     try {
       if (view === 'login' || view === 'landing') {
-        console.log('Attempting Email Login...');
         await signInWithEmail(email, password);
         toast.success('Berhasil masuk!');
       }
 
       if (view === 'register') {
-        console.log('Attempting Email Registration...');
         await signUpWithEmail(email, password, name);
         toast.success('Akun berhasil dibuat!');
       }
 
       if (view === 'forgot') {
-        console.log('Attempting Password Reset...');
         await sendPasswordReset(email);
         toast.success('Email recovery berhasil dikirim. Cek inbox Anda.');
         goTo('login');
@@ -168,10 +165,10 @@ export function Login() {
 
           <div className="relative text-center space-y-4 mb-7">
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="mx-auto w-[42px] h-[42px] rounded-full border border-white/50 flex items-center justify-center bg-white shadow-[0_12px_26px_-12px_rgba(15,23,42,0.45)] overflow-hidden"
+              whileHover={{ scale: 1.08 }}
+              className="mx-auto w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-full border border-white/50 flex items-center justify-center bg-white shadow-[0_16px_32px_-14px_rgba(15,23,42,0.5)] overflow-hidden"
             >
-              <img src="/favicon.webp" alt="Habit Tracker" className="w-[42px] h-[42px] rounded-full object-cover" />
+              <img src="/logo.webp" alt="Habit Tracker" className="w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-full object-cover" />
             </motion.div>
             <div className="space-y-1">
               <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
@@ -207,14 +204,22 @@ export function Login() {
                       <div className="group/field relative">
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within/field:text-primary" />
                         <Input
-                          type="password"
+                          type={showPassword ? 'text' : 'password'}
                           placeholder="Password"
                           value={password}
                           onChange={(event) => setPassword(event.target.value)}
                           minLength={6}
-                          className="h-12 pl-11 rounded-2xl bg-background/45 border-white/25 focus:bg-background/80 transition-all duration-300"
+                          className="h-12 pl-11 pr-11 rounded-2xl bg-background/45 border-white/25 focus:bg-background/80 transition-all duration-300"
                           required
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((value) => !value)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                          aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
                       </div>
                       <div className="flex justify-end px-1">
                         <button
@@ -228,22 +233,26 @@ export function Login() {
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-1">
+                  <div className="space-y-3 pt-2">
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full h-12 rounded-2xl gap-2 shadow-lg transition-all duration-300 active:scale-[0.98]"
+                      className="relative w-full h-[52px] rounded-full px-12 text-[15px] font-semibold shadow-[0_16px_34px_-18px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_38px_-18px_hsl(var(--primary))] active:translate-y-0 active:scale-[0.985]"
                     >
-                      {isSubmitting ? <LoadingDots size={4} /> : 'Masuk ke Dashboard'}
-                      {!isSubmitting && <ArrowRight className="w-4 h-4" />}
+                      <span className="mx-auto flex items-center justify-center">
+                        {isSubmitting ? <LoadingDots size={4} /> : 'Masuk ke Dashboard'}
+                      </span>
+                      {!isSubmitting && (
+                        <ArrowRight className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 opacity-80 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      )}
                     </Button>
 
-                    <div className="relative py-1">
+                    <div className="relative py-1.5">
                       <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-border/50" />
+                        <span className="w-full border-t border-border/40" />
                       </div>
                       <div className="relative flex justify-center text-[10px] uppercase">
-                        <span className="bg-card/70 backdrop-blur px-2 text-muted-foreground/60 font-medium tracking-wider">
+                        <span className="bg-card/80 backdrop-blur px-3 text-muted-foreground/60 font-semibold tracking-[0.18em]">
                           Opsi lainnya
                         </span>
                       </div>
@@ -254,15 +263,19 @@ export function Login() {
                       onClick={handleGoogleSignIn}
                       disabled={isSubmitting}
                       variant="outline"
-                      className="w-full h-12 rounded-2xl gap-3 bg-white/85 border border-slate-200/80 text-foreground shadow-[0_10px_24px_-12px_rgba(15,23,42,0.55)] hover:bg-white hover:shadow-[0_14px_30px_-14px_rgba(15,23,42,0.7)] transition-all duration-300 active:scale-[0.98]"
+                      className="relative flex w-full h-[52px] items-center justify-center overflow-hidden rounded-full border border-slate-200/80 bg-white/90 px-6 text-[15px] font-semibold text-slate-800 shadow-[0_14px_30px_-18px_rgba(15,23,42,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_22px_42px_-22px_rgba(15,23,42,0.9)] active:translate-y-0 active:scale-[0.985] dark:border-white/10 dark:bg-white/10 dark:text-foreground dark:hover:bg-white/15"
                     >
-                      <svg className="w-6 h-6 bg-white rounded-full p-0.5 shadow-sm" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                      </svg>
-                      <span className="text-sm font-medium">Masuk dengan Google</span>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-center">Masuk dengan</span>
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200/70" aria-label="Google">
+                          <svg className="h-[23px] w-[23px]" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                          </svg>
+                        </span>
+                      </div>
                     </Button>
                   </div>
 
@@ -309,14 +322,22 @@ export function Login() {
                     <div className="group/field relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within/field:text-primary" />
                       <Input
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="Password minimal 6 karakter"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         minLength={6}
-                        className="h-12 pl-11 rounded-2xl bg-background/45 border-white/25 focus:bg-background/80 transition-all duration-300"
+                        className="h-12 pl-11 pr-11 rounded-2xl bg-background/45 border-white/25 focus:bg-background/80 transition-all duration-300"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((value) => !value)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                        aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   )}
 
