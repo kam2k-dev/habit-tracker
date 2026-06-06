@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingDots } from '@/components/ui/loading-dots';
-import { ArrowLeft, ArrowRight, Lock, LogOut, Mail, Target, User } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Lock, LogOut, Mail, User, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 type AuthView = 'landing' | 'login' | 'register' | 'forgot';
@@ -18,6 +18,7 @@ export function Login() {
     signUpWithEmail,
     sendPasswordReset,
     logout,
+    setPreviewMode,
   } = useAuth();
   const [view, setView] = useState<AuthView>('landing');
   const [name, setName] = useState('');
@@ -38,10 +39,12 @@ export function Login() {
 
   const handleGoogleSignIn = async () => {
     setIsSubmitting(true);
+    console.log('Initiating Google Sign-In...');
     try {
       await signInWithGoogle();
       toast.success('Berhasil masuk dengan Google!');
     } catch (error: any) {
+      console.error('Google Sign-In Error:', error);
       toast.error(error.message || 'Gagal masuk dengan Google');
     } finally {
       setIsSubmitting(false);
@@ -51,23 +54,28 @@ export function Login() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
+    console.log('Form submitted for view:', view);
     try {
       if (view === 'login' || view === 'landing') {
+        console.log('Attempting Email Login...');
         await signInWithEmail(email, password);
         toast.success('Berhasil masuk!');
       }
 
       if (view === 'register') {
+        console.log('Attempting Email Registration...');
         await signUpWithEmail(email, password, name);
         toast.success('Akun berhasil dibuat!');
       }
 
       if (view === 'forgot') {
+        console.log('Attempting Password Reset...');
         await sendPasswordReset(email);
         toast.success('Email recovery berhasil dikirim. Cek inbox Anda.');
         goTo('login');
       }
     } catch (error: any) {
+      console.error('Submit Error:', error);
       toast.error(error.message || 'Terjadi kesalahan');
     } finally {
       setIsSubmitting(false);
@@ -148,6 +156,14 @@ export function Login() {
         className="w-full max-w-sm relative z-10"
       >
         <div className="relative bg-card/60 backdrop-blur-2xl rounded-[2rem] p-7 border border-white/30 shadow-[0_32px_64px_-16px_rgba(15,23,42,0.18)] overflow-hidden">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute top-4 right-4 z-20 rounded-full h-8 w-8 text-muted-foreground hover:bg-background/50"
+            onClick={() => setPreviewMode(true)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
 
           <div className="relative text-center space-y-4 mb-7">
@@ -257,7 +273,7 @@ export function Login() {
                       onClick={() => goTo('register')}
                       className="text-primary font-semibold hover:underline underline-offset-4 decoration-2"
                     >
-                      Buat akun gratis
+                      Buat akun baru
                     </button>
                   </p>
                 </form>
@@ -336,13 +352,6 @@ export function Login() {
           </AnimatePresence>
         </div>
 
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-5 -right-5 w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 z-0 flex items-center justify-center shadow-lg"
-        >
-          <Target className="w-5 h-5 text-primary/50" />
-        </motion.div>
       </motion.div>
     </div>
   );

@@ -4,5 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5010:80"
+      - "5050:5050"
+    env_file:
+      - .env
     restart: unless-stopped

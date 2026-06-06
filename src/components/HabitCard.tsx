@@ -178,6 +178,11 @@ export function HabitCard({
     
     const delay = hideAfterComplete ? 700 : 350;
     
+    // Haptic feedback on successful toggle
+    if (navigator.vibrate) {
+      navigator.vibrate(isCompleted ? 15 : 30); // Shorter for uncheck, longer for check
+    }
+    
     setTimeout(() => {
       onToggle();
       setIsChecking(false);
@@ -228,7 +233,7 @@ export function HabitCard({
     else {
       animate(x, 0, iosSpring);
     }
-  }, [x, isCompleted, isToday, habit.archived]);
+  }, [x, isCompleted, isToday, habit.archived, canToggle]);
 
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -315,7 +320,7 @@ export function HabitCard({
           dragElastic={0.3}
         >
           <Card 
-            className={`habit-card p-4 transition-all duration-300 relative overflow-hidden group ${
+            className={`habit-card p-4 transition-all duration-300 relative overflow-hidden group transform-gpu will-change-transform hover:-translate-y-1 hover:shadow-xl hover:border-primary/20 ${
               isDragging ? 'dragging scale-[1.02] shadow-2xl z-50' : ''
             } ${isSwiping ? 'cursor-grabbing' : ''} ${
               isCompleted 
@@ -328,24 +333,32 @@ export function HabitCard({
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
-          <div className="flex items-center gap-3 relative">
+          <div className="flex items-center gap-3 relative transition-transform duration-300 group-hover:translate-x-0.5">
             {/* Checkbox - Kiri khusus untuk klik */}
             <motion.div
-              animate={isChecking ? { scale: [1, 1.12, 0.95, 1], opacity: 1 } : { scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+              animate={isChecking ? { scale: [1, 1.18, 0.92, 1], opacity: 1 } : isCompleted ? { scale: 1.08, opacity: 1 } : { scale: 1, opacity: 1 }}
+              transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
               onContextMenu={(e) => e.preventDefault()}
               className="touch-manipulation"
             >
-              <Checkbox
-                checked={isCompleted}
-                onCheckedChange={handleCheckboxToggle}
-                disabled={!canToggle || isChecking}
-                className={`h-6 w-6 rounded-full border-2 habit-checkbox shrink-0 z-20 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${
-                  isGood 
-                    ? 'data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 data-[state=checked]:shadow-[0_0_20px_rgba(16,185,129,0.7)]' 
-                    : 'data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500 data-[state=checked]:shadow-[0_0_20px_rgba(244,63,94,0.7)]'
-                } ${isChecking ? 'opacity-70 scale-90' : 'opacity-100 hover:scale-110'}`}
-              />
+              <motion.div
+                key={isCompleted ? 'done' : 'idle'}
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.7, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+              >
+                <Checkbox
+                  checked={isCompleted}
+                  onCheckedChange={handleCheckboxToggle}
+                  disabled={!canToggle || isChecking}
+                  className={`h-6 w-6 rounded-full border-2 habit-checkbox shrink-0 z-20 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${
+                    isGood 
+                      ? 'data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 data-[state=checked]:shadow-[0_0_20px_rgba(16,185,129,0.7)]' 
+                      : 'data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500 data-[state=checked]:shadow-[0_0_20px_rgba(244,63,94,0.7)]'
+                  } ${isChecking ? 'opacity-70 scale-90' : 'opacity-100 hover:scale-110'}`}
+                />
+              </motion.div>
             </motion.div>
 
             {/* Habit Info - Tengah sampai Kanan untuk Drag */}

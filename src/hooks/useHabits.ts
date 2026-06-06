@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Habit, HabitType, HabitLog, HabitStats, DayActivityDetail } from '@/types/habit';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,12 +11,14 @@ import {
   query,
   where,
   writeBatch,
-  getDocs,
   type QuerySnapshot,
   type DocumentData,
   type FirestoreError,
   type QueryDocumentSnapshot,
 } from 'firebase/firestore';
+
+const LOCAL_CACHE_VERSION = 'v1';
+const getCacheKey = (userId: string) => `habit-tracker:${LOCAL_CACHE_VERSION}:${userId}`;
 
 export function useHabits() {
   const { user, isPreviewMode } = useAuth();
@@ -24,17 +26,47 @@ export function useHabits() {
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from Firestore when user changes - OPTIMIZED
+  // Refs to avoid stale closures in snapshot callbacks
+  const habitsRef = useRef<Habit[]>(habits);
+  const logsRef = useRef<HabitLog[]>(logs);
+  habitsRef.current = habits;
+  logsRef.current = logs;
+
+  const persistCache = useCallback((nextHabits: Habit[], nextLogs: HabitLog[], userId?: string) => {
+    if (!userId || typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(getCacheKey(userId), JSON.stringify({ habits: nextHabits, logs: nextLogs }));
+    } catch {
+      // Ignore cache write failures
+    }
+  }, []);
+
+  // Load from local cache first, then sync Firestore in background
   useEffect(() => {
     if (!user || isPreviewMode) {
-      // In preview mode or unauthenticated, we load empty/local data initially
       setHabits([]);
       setLogs([]);
       setIsLoaded(true);
       return;
     }
 
-    setIsLoaded(false);
+    // 1. Load from localStorage cache for instant display
+    const userCacheKey = getCacheKey(user.uid);
+    try {
+      const cached = localStorage.getItem(userCacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached) as { habits?: Habit[]; logs?: HabitLog[] };
+        if (Array.isArray(parsed.habits)) setHabits(parsed.habits);
+        if (Array.isArray(parsed.logs)) setLogs(parsed.logs);
+        setIsLoaded(true);
+      } else {
+        setIsLoaded(false);
+      }
+    } catch {
+      setIsLoaded(false);
+    }
+
+    // 2. Setup real-time Firestore listeners (background sync)
     let habitsLoaded = false;
     let logsLoaded = false;
     const checkAllLoaded = () => {
@@ -43,54 +75,16 @@ export function useHabits() {
       }
     };
 
-    // Subscriptions
     const habitsQuery = query(
       collection(db, 'habits'),
       where('userId', '==', user.uid)
     );
-    
+
     const logsQuery = query(
       collection(db, 'logs'),
       where('userId', '==', user.uid)
     );
 
-    // 1. Try to load from cache first for instant display
-    const loadFromCache = async () => {
-      try {
-        const cachedHabits = await getDocs(habitsQuery);
-        const cachedLogs = await getDocs(logsQuery);
-        
-        if (!cachedHabits.empty) {
-          const habitsData = cachedHabits.docs.map(d => ({
-            id: d.id,
-            ...d.data(),
-          })) as Habit[];
-          setHabits(habitsData);
-          habitsLoaded = true;
-        }
-        
-        if (!cachedLogs.empty) {
-          const logsData = cachedLogs.docs.map(d => ({
-            habitId: d.data().habitId as string,
-            date: d.data().date as string,
-            completed: d.data().completed as boolean,
-          })) as HabitLog[];
-          setLogs(logsData);
-          logsLoaded = true;
-        }
-        
-        if (habitsLoaded && logsLoaded) {
-          setIsLoaded(true);
-        }
-      } catch (e) {
-        console.log('Cache miss or offline, waiting for server...', e);
-      }
-    };
-    
-    // Execute cache load immediately
-    loadFromCache();
-
-    // 2. Setup real-time listeners (will overwrite cache when server responds)
     const unsubscribeHabits = onSnapshot(habitsQuery, (snapshot: QuerySnapshot<DocumentData>) => {
       const habitsData = snapshot.docs.map((d: QueryDocumentSnapshot<DocumentData>) => ({
         id: d.id,
@@ -98,6 +92,8 @@ export function useHabits() {
       })) as Habit[];
       setHabits(habitsData);
       habitsLoaded = true;
+      // Update cache with latest from server
+      persistCache(habitsData, logsRef.current, user.uid);
       checkAllLoaded();
     }, (error: FirestoreError) => {
       console.error('Error loading habits:', error);
@@ -113,6 +109,8 @@ export function useHabits() {
       })) as HabitLog[];
       setLogs(logsData);
       logsLoaded = true;
+      // Update cache with latest from server
+      persistCache(habitsRef.current, logsData, user.uid);
       checkAllLoaded();
     }, (error: FirestoreError) => {
       console.error('Error loading logs:', error);
@@ -120,17 +118,17 @@ export function useHabits() {
       checkAllLoaded();
     });
 
-    // Timeout fallback: show UI after 1.5 seconds even if data not fully loaded
+    // Timeout fallback: show UI even if data not fully loaded
     const timeoutId = setTimeout(() => {
       setIsLoaded(true);
-    }, 1500);
+    }, 1200);
 
     return () => {
       clearTimeout(timeoutId);
       unsubscribeHabits();
       unsubscribeLogs();
     };
-  }, [user]);
+  }, [user, isPreviewMode, persistCache]);
 
   const addHabit = useCallback(async (name: string, type: HabitType) => {
     const id = crypto.randomUUID();

@@ -16,13 +16,14 @@ interface Navbar1Props {
   } | null
   activeHabitsCount: number
   onLogout: () => void
+  onRequestSignIn?: () => void
   onDeleteAll: () => void
   onScrollToTop: () => void
   onAvatarChange?: (avatarUrl: string | null) => void
   isPreviewMode?: boolean
 }
 
-const Navbar1 = ({ user, activeHabitsCount, onLogout, onDeleteAll, onScrollToTop, onAvatarChange, isPreviewMode }: Navbar1Props) => {
+const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteAll, onScrollToTop, onAvatarChange, isPreviewMode }: Navbar1Props) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -70,8 +71,8 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onDeleteAll, onScrollToTop
             {isPreviewMode ? (
               <div className="flex gap-2">
                 <button
-                  onClick={onLogout}
-                  className="px-4 py-1.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition shadow-sm"
+                  onClick={onRequestSignIn}
+                  className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs font-semibold leading-none bg-primary text-primary-foreground hover:opacity-90 transition shadow-sm"
                 >
                   Sign In / Sign Up
                 </button>

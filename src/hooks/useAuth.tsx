@@ -32,6 +32,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, pass: string) => Promise<void>;
   signUpWithEmail: (email: string, pass: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  requestSignIn: () => void;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   setPassword: (newPassword: string) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
@@ -47,12 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPreviewMode, setIsPreviewMode] = useState(true);
+  const [forceShowLogin, setForceShowLogin] = useState(false);
   const isLoggingOut = useRef(false);
 
   useEffect(() => {
     // Reset isLoggingOut on mount to prevent stuck loading state
     isLoggingOut.current = false;
-
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser: User | null) => {
@@ -65,10 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeoutId);
     });
 
-    // Timeout fallback: stop loading after 5 seconds
+    // Timeout fallback: stop loading quickly if auth is slow
     timeoutId = setTimeout(() => {
       setLoading(false);
-    }, 5000);
+    }, 1200);
 
     return () => {
       clearTimeout(timeoutId);
@@ -111,19 +112,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoggingOut.current = true;
     setLoading(true);
     try {
-      if (isPreviewMode) {
-        setIsPreviewMode(false);
-      } else {
+      // Always enable preview mode (main menu) after logout - no login required
+      if (!isPreviewMode) {
         await signOut(auth);
       }
+      setIsPreviewMode(true);
+      setForceShowLogin(false);
     } catch (error) {
       console.error('Error signing out:', error);
+      // Still enable preview mode even if signOut fails
+      setIsPreviewMode(true);
+      setForceShowLogin(false);
     } finally {
-      // Reset loading state immediately after signOut
-      // onAuthStateChanged will handle the user state update
       isLoggingOut.current = false;
       setLoading(false);
     }
+  };
+
+  const requestSignIn = () => {
+    // Exit preview mode so the login page is rendered
+    setIsPreviewMode(false);
+    setForceShowLogin(true);
   };
 
   const reauthenticateCurrent = async (currentUser: User, reauth?: ReauthPayload) => {
@@ -241,12 +250,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user,
       loading,
-      isPreviewMode,
-      setPreviewMode: setIsPreviewMode,
+      isPreviewMode: isPreviewMode && !forceShowLogin,
+      setPreviewMode: (val: boolean) => {
+        setIsPreviewMode(val);
+        setForceShowLogin(!val);
+      },
       signInWithGoogle,
       signInWithEmail,
       signUpWithEmail,
       logout,
+      requestSignIn,
       changePassword,
       setPassword,
       sendPasswordReset,

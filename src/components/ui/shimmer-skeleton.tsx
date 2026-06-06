@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+// CSS‑only shimmer skeleton – no framer‑motion import needed
 
 interface ShimmerSkeletonProps {
   className?: string;
@@ -15,20 +15,9 @@ export function ShimmerSkeleton({
 }: ShimmerSkeletonProps) {
   return (
     <div 
-      className={`relative overflow-hidden bg-muted/60 ${className}`}
+      className={`skeleton-shimmer relative overflow-hidden bg-muted/60 ${className}`}
       style={{ width, height, borderRadius }}
-    >
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-muted-foreground/10 to-transparent"
-        initial={{ x: "-100%" }}
-        animate={{ x: "100%" }}
-        transition={{
-          repeat: Infinity,
-          duration: 1.5,
-          ease: "linear",
-        }}
-      />
-    </div>
+    />
   );
 }
 

@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Navbar1 } from '@/components/ui/navbar-1';
 import { FloatingBottomNav } from '@/components/ui/floating-bottom-nav';
 import { DailyHero } from '@/components/DailyHero';
-import { StatsSkeleton } from '@/components/ui/shimmer-skeleton';
+import { StatsSkeleton, ShimmerSkeleton, HabitCardSkeleton } from '@/components/ui/shimmer-skeleton';
+import { TodayPageSkeleton, StatsPageSkeleton } from '@/components/ui/page-skeletons';
 import type { ContributionDay } from '@/components/ui/git-hub-calendar';
 import { HabitCard } from '@/components/HabitCard';
 import { DateSelector } from '@/components/DateSelector';
@@ -51,7 +52,7 @@ const generateDates = (): string[] => {
 const ALL_DATES = generateDates();
 
 function App() {
-  const { user, loading: authLoading, isPreviewMode, logout } = useAuth();
+  const { user, loading: authLoading, isPreviewMode, logout, requestSignIn } = useAuth();
   
   // Load custom avatar from localStorage on mount
   const [customAvatar, setCustomAvatar] = useState<string | null>(() => {
@@ -230,22 +231,18 @@ function App() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="h-14 border-b bg-card w-full animate-pulse" />
+        <ShimmerSkeleton height="56px" borderRadius="0" className="w-full border-b" />
         <main className="max-w-4xl mx-auto px-4 pt-8 pb-6 space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-card rounded-2xl animate-pulse border border-border/50" />
-            ))}
-          </div>
+          <StatsSkeleton />
           <div className="space-y-4 mt-8">
             <div className="flex gap-2">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-10 w-24 bg-card rounded-md animate-pulse" />
+                <ShimmerSkeleton key={i} width="96px" height="40px" borderRadius="6px" />
               ))}
             </div>
-            <div className="h-12 bg-card rounded-xl animate-pulse" />
+            <ShimmerSkeleton height="48px" borderRadius="12px" />
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-card rounded-2xl animate-pulse border border-border/50" />
+              <HabitCardSkeleton key={i} />
             ))}
           </div>
         </main>
@@ -491,23 +488,14 @@ function App() {
           user={currentUser ? { ...currentUser, photoURL: customAvatar || currentUser.photoURL } : null}
           activeHabitsCount={0}
           onLogout={logout}
+          onRequestSignIn={requestSignIn}
           onDeleteAll={handleDeleteAllHabits}
           onScrollToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           onAvatarChange={setCustomAvatar}
           isPreviewMode={isPreviewMode}
         />
         <main className="max-w-4xl mx-auto px-4 pt-8 pb-6 space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-card rounded-2xl animate-pulse border border-border/50" />
-            ))}
-          </div>
-          <div className="space-y-4 mt-8">
-            <div className="h-12 bg-card rounded-xl animate-pulse" />
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-card rounded-2xl animate-pulse border border-border/50" />
-            ))}
-          </div>
+          {activeTab === 'stats' ? <StatsPageSkeleton /> : <TodayPageSkeleton />}
         </main>
       </div>
     );
@@ -532,6 +520,7 @@ function App() {
         user={currentUser ? { ...currentUser, photoURL: customAvatar || currentUser.photoURL } : null}
         activeHabitsCount={activeHabits.length}
         onLogout={logout}
+        onRequestSignIn={requestSignIn}
         onDeleteAll={handleDeleteAllHabits}
         onScrollToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         onAvatarChange={setCustomAvatar}
@@ -750,7 +739,7 @@ function App() {
 
             <Card className="p-5 relative">
               <h2 className="text-sm font-medium mb-4">Grafik Aktivitas</h2>
-              <Suspense fallback={<div className="h-[150px] animate-pulse bg-muted rounded-md" />}>
+              <Suspense fallback={<ShimmerSkeleton height="150px" borderRadius="6px" />}>
                 <GitHubCalendar 
                   key={calendarKey} 
                   data={contributionData}

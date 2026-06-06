@@ -77,37 +77,35 @@ export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodC
             </div>
             <motion.div
               variants={itemVariants}
-              whileHover={{ scale: 1.06, rotate: 2 }}
-              whileTap={{ scale: 0.97 }}
-              className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-emerald-100/90 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-900/30 shadow-sm"
+              whileHover={{ scale: 1.04, rotate: 1 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100/90 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-900/30 shadow-sm"
             >
-              {totalHabits === 0 ? (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 dark:text-emerald-400">
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" opacity="0.28" />
-                  <circle cx="12" cy="12" r="6.5" stroke="currentColor" strokeWidth="1.8" opacity="0.5" />
-                  <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.9" />
-                </svg>
-              ) : isAllDone ? (
-                <motion.svg
-                  xmlns="http://www.w3.org/2000/svg"
+              <svg className="absolute inset-1 w-auto h-auto -rotate-90" viewBox="0 0 48 48" aria-hidden="true">
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="18"
                   fill="none"
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.25)]"
-                  animate={{ scale: [1, 1.08, 1], rotate: [0, 4, 0] }}
-                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" opacity="0.25" />
-                  <circle cx="12" cy="12" r="6.5" stroke="currentColor" strokeWidth="1.8" opacity="0.45" />
-                  <path d="M8.5 12.5 11 15l4.5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </motion.svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 dark:text-emerald-400">
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" opacity="0.25" />
-                  <circle cx="12" cy="12" r="6.5" stroke="currentColor" strokeWidth="1.8" opacity="0.45" />
-                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.95" />
-                </svg>
-              )}
+                  stroke="currentColor"
+                  strokeWidth="4.5"
+                  className="text-emerald-100 dark:text-emerald-900/50 opacity-45"
+                />
+                <motion.circle
+                  cx="24"
+                  cy="24"
+                  r="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="4.5"
+                  strokeLinecap="round"
+                  className="text-emerald-500 dark:text-emerald-400"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: totalHabits > 0 ? progress / 100 : 0 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  style={{ pathLength: totalHabits > 0 ? progress / 100 : 0 }}
+                />
+              </svg>
             </motion.div>
           </motion.div>
 

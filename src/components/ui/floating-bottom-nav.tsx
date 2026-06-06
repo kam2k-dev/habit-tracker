@@ -49,19 +49,6 @@ export function FloatingBottomNav({
       className
     )}>
       <div className="bg-card/70 backdrop-blur-xl border border-white/10 dark:border-white/5 shadow-2xl shadow-black/10 rounded-full py-2 px-2 flex items-center justify-between relative ring-1 ring-white/20">
-        
-        {/* Animated background pill for active tab */}
-        {activeTab !== 'add' && (
-          <motion.div
-            layoutId="active-pill"
-            className="absolute bg-white/10 dark:bg-black/10 rounded-full h-[calc(100%-16px)] z-0 shadow-sm"
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            style={{
-              width: 'calc(20% - 8px)',
-              left: `calc(${items.findIndex(i => i.id === activeTab) * 20}% + 4px)`
-            }}
-          />
-        )}
 
         {items.map((item) => {
           const isActive = activeTab === item.id;
@@ -89,31 +76,28 @@ export function FloatingBottomNav({
               onClick={() => onTabChange(item.id)}
               onMouseEnter={() => setHoveredTab(item.id)}
               onMouseLeave={() => setHoveredTab(null)}
-              className="w-[20%] flex flex-col items-center justify-center py-2 relative z-10 transition-colors"
+              className={cn(
+                "w-[20%] flex flex-col items-center justify-center py-2 relative z-10 transition-all duration-300 rounded-full",
+                isActive && "-translate-y-0.5"
+              )}
             >
               <motion.div
                 animate={{ 
-                  scale: isActive ? 1.1 : 1,
-                  y: isActive ? -2 : 0
+                  scale: isActive ? 1.14 : 1,
+                  y: isActive ? -3 : 0,
+                  rotate: isActive ? [0, -6, 0] : 0
                 }}
-                className="relative"
+                transition={{ type: 'spring', stiffness: 320, damping: 20 }}
+                className={cn(
+                  "relative flex items-center justify-center rounded-full p-2 transition-colors duration-300",
+                  isActive && "bg-background/70 shadow-[0_0_0_1px_rgba(255,255,255,0.25),0_6px_20px_rgba(0,0,0,0.08)]"
+                )}
               >
                 <Icon className={cn(
                   "h-5 w-5 transition-all duration-300",
-                  isActive ? "text-foreground" : "text-muted-foreground/60",
+                  isActive ? "text-foreground drop-shadow-sm" : "text-muted-foreground/60",
                   isActive && item.color && item.color
                 )} />
-                {isActive && (
-                  <motion.div 
-                    layoutId="active-dot"
-                    className={cn(
-                      "absolute -bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full",
-                      item.id === 'good' ? 'bg-emerald-500' : 
-                      item.id === 'bad' ? 'bg-rose-500' : 
-                      item.id === 'today' ? 'bg-blue-500' : 'bg-foreground'
-                    )}
-                  />
-                )}
               </motion.div>
             </button>
           );
