@@ -45,10 +45,11 @@ export function FloatingBottomNav({
 
   return (
     <div className={cn(
-      "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-lg",
+      "fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md px-1",
       className
     )}>
-      <div className="bg-card/70 backdrop-blur-xl border border-white/10 dark:border-white/5 shadow-2xl shadow-black/10 rounded-full py-2 px-2 flex items-center justify-between relative ring-1 ring-white/20">
+      <div className="relative isolate flex h-16 items-center justify-between overflow-visible rounded-[2rem] border border-white/35 bg-white/[0.22] px-2 shadow-[0_18px_50px_rgba(15,23,42,0.22),inset_0_1px_1px_rgba(255,255,255,0.55),inset_0_-1px_1px_rgba(255,255,255,0.18)] ring-1 ring-white/35 backdrop-blur-[28px] backdrop-saturate-200 before:pointer-events-none before:absolute before:inset-[1px] before:-z-10 before:rounded-[1.9rem] before:bg-gradient-to-b before:from-white/45 before:via-white/12 before:to-white/5 dark:border-white/15 dark:bg-slate-950/[0.28] dark:shadow-[0_18px_55px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.18),inset_0_-1px_1px_rgba(255,255,255,0.06)] dark:ring-white/10 dark:before:from-white/16 dark:before:via-white/7 dark:before:to-white/3 supports-[backdrop-filter]:bg-white/[0.18] supports-[backdrop-filter]:dark:bg-slate-950/[0.22]">
+        <div className="pointer-events-none absolute inset-0 -z-20 rounded-[2rem] bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.55),transparent_28%),radial-gradient(circle_at_82%_88%,rgba(255,255,255,0.18),transparent_36%)] opacity-80 dark:opacity-30" />
 
         {items.map((item) => {
           const isActive = activeTab === item.id;
@@ -57,16 +58,23 @@ export function FloatingBottomNav({
 
           if (isAdd) {
             return (
-              <div key={item.id} className="w-[20%] flex justify-center z-10">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onAddClick}
-                  className="bg-primary text-primary-foreground h-12 w-12 -mt-6 rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.15)] ring-4 ring-background dark:ring-background/80"
+              <button
+                key={item.id}
+                onClick={onAddClick}
+                onMouseEnter={() => setHoveredTab(item.id)}
+                onMouseLeave={() => setHoveredTab(null)}
+                aria-label="Tambah habit"
+                className="relative z-10 flex h-12 w-[20%] flex-col items-center justify-center rounded-full transition-all duration-300"
+              >
+                <motion.div
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ type: 'spring', stiffness: 340, damping: 22 }}
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/30 shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_1px_rgba(255,255,255,0.65)] backdrop-blur-xl dark:border-white/12 dark:bg-white/[0.10] dark:shadow-[0_8px_24px_rgba(0,0,0,0.28),inset_0_1px_1px_rgba(255,255,255,0.14)]"
                 >
-                  <Plus className="h-6 w-6" />
-                </motion.button>
-              </div>
+                  <Plus className="h-[22px] w-[22px] text-foreground drop-shadow-sm dark:text-white" />
+                </motion.div>
+              </button>
             );
           }
 
@@ -76,26 +84,31 @@ export function FloatingBottomNav({
               onClick={() => onTabChange(item.id)}
               onMouseEnter={() => setHoveredTab(item.id)}
               onMouseLeave={() => setHoveredTab(null)}
-              className={cn(
-                "w-[20%] flex flex-col items-center justify-center py-2 relative z-10 transition-all duration-300 rounded-full",
-                isActive && "-translate-y-0.5"
-              )}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
+              className="relative z-10 flex h-12 w-[20%] flex-col items-center justify-center rounded-full transition-colors duration-300"
             >
               <motion.div
-                animate={{ 
-                  scale: isActive ? 1.14 : 1,
-                  y: isActive ? -3 : 0,
-                  rotate: isActive ? [0, -6, 0] : 0
+                initial={false}
+                animate={{
+                  scale: isActive ? 1.18 : 1,
                 }}
-                transition={{ type: 'spring', stiffness: 320, damping: 20 }}
+                transition={{
+                  scale: {
+                    type: 'spring',
+                    stiffness: 230,
+                    damping: 26,
+                    mass: 0.75,
+                  },
+                }}
                 className={cn(
-                  "relative flex items-center justify-center rounded-full p-2 transition-colors duration-300",
-                  isActive && "bg-background/70 shadow-[0_0_0_1px_rgba(255,255,255,0.25),0_6px_20px_rgba(0,0,0,0.08)]"
+                  "relative flex h-11 w-11 transform-gpu items-center justify-center rounded-full transition-[background-color,border-color,box-shadow,backdrop-filter] duration-[400ms] ease-out will-change-transform",
+                  isActive && "border border-white/40 bg-white/30 shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_1px_rgba(255,255,255,0.65)] backdrop-blur-xl dark:border-white/12 dark:bg-white/[0.10] dark:shadow-[0_8px_24px_rgba(0,0,0,0.28),inset_0_1px_1px_rgba(255,255,255,0.14)]"
                 )}
               >
                 <Icon className={cn(
-                  "h-5 w-5 transition-all duration-300",
-                  isActive ? "text-foreground drop-shadow-sm" : "text-muted-foreground/60",
+                  "h-[22px] w-[22px] transition-colors duration-[400ms] ease-out",
+                  isActive ? "text-foreground drop-shadow-sm dark:text-white" : "text-foreground/45 dark:text-white/45",
                   isActive && item.color && item.color
                 )} />
               </motion.div>

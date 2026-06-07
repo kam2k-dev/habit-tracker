@@ -228,7 +228,7 @@ function App() {
   }, [isLoaded, user, activeHabits.length]);
 
   // Show skeleton instead of spinner during auth initialization
-  if (authLoading) {
+  if (authLoading && !user) {
     return (
       <div className="min-h-screen bg-background">
         <ShimmerSkeleton height="56px" borderRadius="0" className="w-full border-b" />

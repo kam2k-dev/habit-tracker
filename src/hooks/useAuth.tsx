@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -56,20 +58,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoggingOut.current = false;
     let timeoutId: ReturnType<typeof setTimeout>;
 
+    // Handle any pending redirect result from a previous auth attempt
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+          setIsPreviewMode(false);
+          setForceShowLogin(false);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error('getRedirectResult error:', err);
+        setLoading(false);
+      });
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser: User | null) => {
       setUser(currentUser);
       if (currentUser) {
         setIsPreviewMode(false);
+        setForceShowLogin(false);
       }
       // Always set loading to false when auth state changes
       setLoading(false);
       clearTimeout(timeoutId);
     });
 
-    // Timeout fallback: stop loading quickly if auth is slow
+    // Timeout fallback: stop loading if auth is slow (increased for Brave)
     timeoutId = setTimeout(() => {
       setLoading(false);
-    }, 1200);
+    }, 5000);
 
     return () => {
       clearTimeout(timeoutId);
@@ -78,12 +96,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-      setIsPreviewMode(false);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      throw error;
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        setUser(result.user);
+        setIsPreviewMode(false);
+        setForceShowLogin(false);
+      }
+    } catch (error: any) {
+      console.error('Popup sign-in failed, falling back to redirect:', error);
+      try {
+        await signInWithRedirect(auth, googleProvider);
+      } catch (redirectError) {
+        console.error('Error signing in with Google:', redirectError);
+        setLoading(false);
+        throw redirectError;
+      }
+    } finally {
+      // Don't set loading false here because redirect might be happening 
+      // or onAuthStateChanged will handle it for popup
     }
   };
 
@@ -149,8 +181,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (providerId === GoogleAuthProvider.PROVIDER_ID) {
-      await signInWithPopup(auth, googleProvider);
-      return;
+      // Reauthentication via redirect will cause page reload; user will re-authenticate
+      throw new Error('Silakan login ulang menggunakan tombol Login Google.');
     }
     throw new Error('Metode login tidak dikenali. Tidak dapat mengautentikasi ulang.');
   };

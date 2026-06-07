@@ -1,5 +1,5 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration - you'll need to replace these with your own Firebase project config
@@ -40,5 +40,10 @@ try {
 export const auth = getAuth(app as any);
 export const db = getFirestore(app as any);
 export const googleProvider = new GoogleAuthProvider();
+
+// Set auth persistence to localStorage fallback for Brave/blocking browsers
+setPersistence(auth, browserLocalPersistence).catch((err) => {
+  console.warn('Auth persistence failed (Brave may block IndexedDB):', err);
+});
 
 export default app;
