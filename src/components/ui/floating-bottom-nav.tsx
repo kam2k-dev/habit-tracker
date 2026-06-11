@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
@@ -22,48 +21,12 @@ interface FloatingBottomNavProps {
   className?: string;
 }
 
-/**
- * Accumulates scroll delta so direction flips only after enough px,
- * preventing jitter. Returns true when compact (scrolling down).
- */
-function useScrollCompact(): boolean {
-  const [compact, setCompact] = useState(false);
-  const lastY = useRef(0);
-  const downAccum = useRef(0);
-  const upAccum = useRef(0);
-  const THRESHOLD = 12;
-
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      const delta = y - lastY.current;
-      lastY.current = y;
-
-      if (delta > 0) {
-        downAccum.current += delta;
-        upAccum.current = 0;
-        if (downAccum.current >= THRESHOLD) setCompact(true);
-      } else if (delta < 0) {
-        upAccum.current += Math.abs(delta);
-        downAccum.current = 0;
-        if (upAccum.current >= THRESHOLD) setCompact(false);
-      }
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  return compact;
-}
-
 export function FloatingBottomNav({
   activeTab,
   onTabChange,
   onAddClick,
   className,
 }: FloatingBottomNavProps) {
-  const compact = useScrollCompact();
-
   const items: NavItem[] = [
     { id: 'today', label: 'Hari Ini', icon: HomeIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-blue-500 dark:text-blue-500' },
     { id: 'good', label: 'Baik', icon: GoodHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-emerald-500 dark:text-emerald-400' },
@@ -73,40 +36,16 @@ export function FloatingBottomNav({
   ];
 
   return (
-    <motion.div
-      initial={false}
-      animate={{
-        width: compact ? '65%' : '92%',
-        maxWidth: compact ? 280 : 448,
-      }}
-      transition={{
-        type: 'spring',
-        stiffness: 260,
-        damping: 30,
-        mass: 0.7,
-      }}
+    <div
       className={cn(
-        'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 px-1',
+        'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 px-1 w-[92%] max-w-md',
         className,
       )}
     >
       {/* Bar wrapper */}
-      <motion.div
-        initial={false}
-        animate={{
-          height: compact ? 44 : 64,
-          paddingLeft: compact ? 8 : 16,
-          paddingRight: compact ? 8 : 16,
-          borderRadius: compact ? 9999 : 32,
-        }}
-        transition={{
-          type: 'spring',
-          stiffness: 260,
-          damping: 30,
-          mass: 0.7,
-        }}
+      <div
         className={cn(
-          'relative isolate flex items-center justify-between overflow-visible border border-white/35 backdrop-blur-[28px] backdrop-saturate-200',
+          'relative isolate flex items-center justify-between overflow-visible border border-white/35 backdrop-blur-[28px] backdrop-saturate-200 h-16 px-4 rounded-[32px]',
           'before:pointer-events-none before:absolute before:inset-[1px] before:-z-10 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/45 before:via-white/12 before:to-white/5',
           'dark:border-white/15 dark:before:from-white/16 dark:before:via-white/7 dark:before:to-white/3',
           'supports-[backdrop-filter]:bg-white/[0.18] supports-[backdrop-filter]:dark:bg-slate-950/[0.22]',
@@ -137,19 +76,12 @@ export function FloatingBottomNav({
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 340, damping: 22 }}
                   className={cn(
-                    'relative flex items-center justify-center rounded-full border border-white/40 bg-white/30 backdrop-blur-xl',
+                    'relative flex items-center justify-center rounded-full border border-white/40 bg-white/30 backdrop-blur-xl h-12 w-12',
                     'shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_1px_rgba(255,255,255,0.65)]',
                     'dark:border-white/12 dark:bg-white/[0.10] dark:shadow-[0_8px_24px_rgba(0,0,0,0.28),inset_0_1px_1px_rgba(255,255,255,0.14)]',
-                    'transition-[width,height] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]',
-                    compact ? 'h-9 w-9' : 'h-12 w-12',
                   )}
                 >
-                  <Plus
-                    className={cn(
-                      'text-foreground drop-shadow-sm dark:text-white transition-[width,height] duration-300',
-                      compact ? 'h-[20px] w-[20px]' : 'h-6 w-6',
-                    )}
-                  />
+                  <Plus className="text-foreground drop-shadow-sm dark:text-white h-6 w-6" />
                 </motion.div>
               </button>
             );
@@ -177,16 +109,11 @@ export function FloatingBottomNav({
                   damping: 24,
                   mass: 0.6,
                 }}
-                className={cn(
-                  'relative flex items-center justify-center rounded-full will-change-transform',
-                  'transition-[width,height] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]',
-                  compact ? 'h-6 w-6' : 'h-8 w-8',
-                )}
+                className="relative flex items-center justify-center rounded-full will-change-transform h-8 w-8"
               >
                 <Icon
                   className={cn(
-                    'transition-[color,width,height] duration-300 ease-out',
-                    compact ? 'h-[18px] w-[18px]' : 'h-[22px] w-[22px]',
+                    'transition-colors duration-300 ease-out h-[22px] w-[22px]',
                     isActive
                       ? cn('drop-shadow-sm', item.activeColor)
                       : item.color,
@@ -198,7 +125,7 @@ export function FloatingBottomNav({
             </button>
           );
         })}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
