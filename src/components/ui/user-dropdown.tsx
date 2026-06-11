@@ -113,11 +113,11 @@ export function UserDropdown({
               >
                 <span className="flex items-center gap-2 font-medium text-gray-600 dark:text-gray-400 text-sm">
                   {theme === 'light' ? (
-                    <Sun className="size-4 text-gray-500 dark:text-gray-400" />
-                  ) : (
                     <Moon className="size-4 text-gray-500 dark:text-gray-400" />
+                  ) : (
+                    <Sun className="size-4 text-gray-500 dark:text-gray-400" />
                   )}
-                  Mode {theme === 'light' ? 'Terang' : 'Gelap'}
+                  Mode {theme === 'light' ? 'Gelap' : 'Terang'}
                 </span>
               </DropdownMenuItem>
             </DropdownMenuGroup>

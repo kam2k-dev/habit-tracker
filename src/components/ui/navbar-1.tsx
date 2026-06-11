@@ -213,11 +213,11 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       className="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-400 hover:bg-muted rounded-xl transition-colors text-left"
                     >
                       {theme === 'light' ? (
-                        <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                      ) : (
                         <Moon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      ) : (
+                        <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                       )}
-                      <span>Mode {theme === 'light' ? 'Terang' : 'Gelap'}</span>
+                      <span>Mode {theme === 'light' ? 'Gelap' : 'Terang'}</span>
                     </motion.button>
 
                     {/* Sign In button for Preview Mode */}
@@ -266,11 +266,11 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       className="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-400 hover:bg-muted rounded-xl transition-colors text-left"
                     >
                       {theme === 'light' ? (
-                        <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                      ) : (
                         <Moon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      ) : (
+                        <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                       )}
-                      <span>Mode {theme === 'light' ? 'Terang' : 'Gelap'}</span>
+                      <span>Mode {theme === 'light' ? 'Gelap' : 'Terang'}</span>
                     </motion.button>
 
                     {/* Delete All */}
