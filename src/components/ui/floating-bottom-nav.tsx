@@ -23,27 +23,37 @@ interface FloatingBottomNavProps {
 }
 
 /**
- * Returns a scroll-direction signal: 'down' | 'up' | null.
- * Threshold-based to avoid jitter on tiny scrolls.
+ * Accumulates scroll delta so direction flips only after enough px,
+ * preventing jitter. Returns true when compact (scrolling down).
  */
-function useScrollDirection(opts?: { threshold?: number }) {
-  const threshold = opts?.threshold ?? 10;
-  const [dir, setDir] = useState<'down' | 'up' | null>(null);
+function useScrollCompact(): boolean {
+  const [compact, setCompact] = useState(false);
   const lastY = useRef(0);
+  const downAccum = useRef(0);
+  const upAccum = useRef(0);
+  const THRESHOLD = 12;
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
       const delta = y - lastY.current;
-      if (Math.abs(delta) < threshold) return;
-      setDir(delta > 0 ? 'down' : 'up');
       lastY.current = y;
+
+      if (delta > 0) {
+        downAccum.current += delta;
+        upAccum.current = 0;
+        if (downAccum.current >= THRESHOLD) setCompact(true);
+      } else if (delta < 0) {
+        upAccum.current += Math.abs(delta);
+        downAccum.current = 0;
+        if (upAccum.current >= THRESHOLD) setCompact(false);
+      }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [threshold]);
+  }, []);
 
-  return dir;
+  return compact;
 }
 
 export function FloatingBottomNav({
@@ -52,11 +62,10 @@ export function FloatingBottomNav({
   onAddClick,
   className,
 }: FloatingBottomNavProps) {
-  const scrollDir = useScrollDirection({ threshold: 8 });
-  const isCompact = scrollDir === 'down';
+  const compact = useScrollCompact();
 
   const items: NavItem[] = [
-    { id: 'today', label: 'Hari Ini', icon: HomeIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-blue-500 dark:text-blue-400' },
+    { id: 'today', label: 'Hari Ini', icon: HomeIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-blue-500 dark:text-blue-500' },
     { id: 'good', label: 'Baik', icon: GoodHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-emerald-500 dark:text-emerald-400' },
     { id: 'add', label: '', icon: Plus },
     { id: 'bad', label: 'Buruk', icon: BadHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-rose-500 dark:text-rose-400' },
@@ -64,27 +73,37 @@ export function FloatingBottomNav({
   ];
 
   return (
-    <div
+    <motion.div
+      initial={false}
+      animate={{
+        width: compact ? '65%' : '92%',
+        maxWidth: compact ? 280 : 448,
+      }}
+      transition={{
+        type: 'spring',
+        stiffness: 260,
+        damping: 30,
+        mass: 0.7,
+      }}
       className={cn(
-        'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 px-1 -translate-x-1/2',
-        'transition-[width,max-width] duration-350 ease-out',
-        isCompact ? 'w-[65%] max-w-[280px]' : 'w-[92%] max-w-md',
+        'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 px-1',
         className,
       )}
     >
-      {/* Bar wrapper – animated with Framer Motion for smooth GPU transitions */}
+      {/* Bar wrapper */}
       <motion.div
         initial={false}
         animate={{
-          height: isCompact ? 44 : 64,
-          paddingLeft: isCompact ? 8 : 16,
-          paddingRight: isCompact ? 8 : 16,
-          borderRadius: isCompact ? 9999 : 32,
+          height: compact ? 44 : 64,
+          paddingLeft: compact ? 8 : 16,
+          paddingRight: compact ? 8 : 16,
+          borderRadius: compact ? 9999 : 32,
         }}
         transition={{
-          type: 'tween',
-          duration: 0.35,
-          ease: [0.2, 0, 0, 1],
+          type: 'spring',
+          stiffness: 260,
+          damping: 30,
+          mass: 0.7,
         }}
         className={cn(
           'relative isolate flex items-center justify-between overflow-visible border border-white/35 backdrop-blur-[28px] backdrop-saturate-200',
@@ -122,13 +141,13 @@ export function FloatingBottomNav({
                     'shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_1px_rgba(255,255,255,0.65)]',
                     'dark:border-white/12 dark:bg-white/[0.10] dark:shadow-[0_8px_24px_rgba(0,0,0,0.28),inset_0_1px_1px_rgba(255,255,255,0.14)]',
                     'transition-[width,height] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]',
-                    isCompact ? 'h-9 w-9' : 'h-12 w-12',
+                    compact ? 'h-9 w-9' : 'h-12 w-12',
                   )}
                 >
                   <Plus
                     className={cn(
                       'text-foreground drop-shadow-sm dark:text-white transition-[width,height] duration-300',
-                      isCompact ? 'h-[20px] w-[20px]' : 'h-6 w-6',
+                      compact ? 'h-[20px] w-[20px]' : 'h-6 w-6',
                     )}
                   />
                 </motion.div>
@@ -161,13 +180,13 @@ export function FloatingBottomNav({
                 className={cn(
                   'relative flex items-center justify-center rounded-full will-change-transform',
                   'transition-[width,height] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]',
-                  isCompact ? 'h-6 w-6' : 'h-8 w-8',
+                  compact ? 'h-6 w-6' : 'h-8 w-8',
                 )}
               >
                 <Icon
                   className={cn(
                     'transition-[color,width,height] duration-300 ease-out',
-                    isCompact ? 'h-[18px] w-[18px]' : 'h-[22px] w-[22px]',
+                    compact ? 'h-[18px] w-[18px]' : 'h-[22px] w-[22px]',
                     isActive
                       ? cn('drop-shadow-sm', item.activeColor)
                       : item.color,
@@ -180,6 +199,6 @@ export function FloatingBottomNav({
           );
         })}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
