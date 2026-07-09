@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, LogOut, Trash2, Moon, Sun, User, UserCircle } from "lucide-react"
 import { ThemeSwitch } from "./theme-switch-button"
