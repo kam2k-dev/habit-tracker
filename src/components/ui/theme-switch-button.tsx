@@ -8,17 +8,19 @@ interface ThemeSwitchProps {
 }
 
 export function ThemeSwitch({ className = '' }: ThemeSwitchProps) {
-  const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
+  const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      return savedTheme as 'light' | 'dark';
+    }
+    return 'light';
+  });
 
-  // Check current theme on component mount
+  // Toggle theme class on document element on component mount
   React.useEffect(() => {
-    const savedTheme =
-      localStorage.getItem('theme') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-
-    setTheme(savedTheme as 'light' | 'dark')
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark')
-  }, [])
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme])
 
   // Toggle theme
   const toggleTheme = React.useCallback(() => {

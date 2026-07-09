@@ -38,20 +38,19 @@ export function FloatingBottomNav({
   return (
     <div
       className={cn(
-        'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 px-1 w-[92%] max-w-md',
+        'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 px-4 w-full max-w-md md:max-w-4xl',
         className,
       )}
     >
       {/* Bar wrapper */}
       <div
         className={cn(
-          'relative isolate flex items-center justify-between overflow-visible border border-white/35 backdrop-blur-[28px] backdrop-saturate-200 h-16 px-4 rounded-[32px]',
-          'before:pointer-events-none before:absolute before:inset-[1px] before:-z-10 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/45 before:via-white/12 before:to-white/5',
-          'dark:border-white/15 dark:before:from-white/16 dark:before:via-white/7 dark:before:to-white/3',
-          'supports-[backdrop-filter]:bg-white/[0.18] supports-[backdrop-filter]:dark:bg-slate-950/[0.22]',
-          /* Light / dark base */
-          'bg-white/[0.22] shadow-[0_18px_50px_rgba(15,23,42,0.22),inset_0_1px_1px_rgba(255,255,255,0.55),inset_0_-1px_1px_rgba(255,255,255,0.18)] ring-1 ring-white/35',
-          'dark:bg-slate-950/[0.28] dark:shadow-[0_18px_55px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.18),inset_0_-1px_1px_rgba(255,255,255,0.06)] dark:ring-white/10',
+          'relative isolate flex items-center justify-between overflow-visible border border-white/20 dark:border-white/10 backdrop-blur-[24px] backdrop-saturate-200 h-16 px-4 rounded-[32px]',
+          'before:pointer-events-none before:absolute before:inset-[1px] before:-z-10 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/30 before:via-white/10 before:to-white/5',
+          'dark:border-white/10 dark:before:from-white/10 dark:before:via-white/5 dark:before:to-white/2',
+          /* Light / dark base - iOS liquid frosted look */
+          'bg-white/60 dark:bg-slate-950/60 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.15),inset_0_1px_1px_rgba(255,255,255,0.4)] ring-1 ring-white/10',
+          'dark:shadow-[0_18px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.05)] dark:ring-white/5',
         )}
       >
         {/* Subtle radial highlight */}
@@ -87,25 +86,45 @@ export function FloatingBottomNav({
             );
           }
 
-          /* ---- Regular tab (Instagram-style) ---- */
+          /* ---- Regular tab (Instagram-style with iOS sliding indicator) ---- */
           return (
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="relative z-10 flex flex-col items-center justify-center w-[20%] gap-0.5"
+              className="relative z-10 flex flex-col items-center justify-center w-[20%] h-12 overflow-visible"
             >
-              {/* Icon wrapper – Instagram style: no background, just fill + color + subtle scale */}
+              {/* iOS Liquid Sliding Pill Indicator */}
+              {isActive && (
+                <motion.div
+                  layoutId="activeTabPill"
+                  className={cn(
+                    "absolute rounded-2xl -z-10 h-10 w-10 sm:w-14",
+                    item.id === 'today' && "bg-blue-500/15 dark:bg-blue-500/25 shadow-[0_2px_12px_rgba(59,130,246,0.2)]",
+                    item.id === 'good' && "bg-emerald-500/15 dark:bg-emerald-500/25 shadow-[0_2px_12px_rgba(16,185,129,0.2)]",
+                    item.id === 'bad' && "bg-rose-500/15 dark:bg-rose-500/25 shadow-[0_2px_12px_rgba(244,63,94,0.2)]",
+                    item.id === 'stats' && "bg-purple-500/15 dark:bg-purple-500/25 shadow-[0_2px_12px_rgba(168,85,247,0.2)]"
+                  )}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 380,
+                    damping: 28,
+                    mass: 0.8
+                  }}
+                />
+              )}
+
+              {/* Icon wrapper */}
               <motion.div
                 initial={false}
                 animate={{
-                  scale: isActive ? 1.12 : 1,
+                  scale: isActive ? 1.15 : 1,
                   y: isActive ? -1 : 0,
                 }}
                 transition={{
                   type: 'spring',
-                  stiffness: 280,
+                  stiffness: 350,
                   damping: 24,
                   mass: 0.6,
                 }}
@@ -120,8 +139,6 @@ export function FloatingBottomNav({
                   )}
                 />
               </motion.div>
-
-
             </button>
           );
         })}

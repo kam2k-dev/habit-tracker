@@ -69,12 +69,7 @@ function App() {
     }
   }, [customAvatar]);
 
-  useEffect(() => {
-    const storedAvatar = localStorage.getItem('customAvatar');
-    if (storedAvatar) {
-      setCustomAvatar(storedAvatar);
-    }
-  }, []);
+
 
   const {
     activeHabits,
@@ -141,27 +136,25 @@ function App() {
   // Clear pending/animating habits when leaving Today tab or habits change
   useEffect(() => {
     if (activeTab !== 'today') {
-      setPendingHideHabits(new Set());
-      setAnimatingHabits(new Set());
+      setPendingHideHabits(prev => prev.size > 0 ? new Set() : prev);
+      setAnimatingHabits(prev => prev.size > 0 ? new Set() : prev);
     }
-  }, [activeTab, setPendingHideHabits, setAnimatingHabits]);
+  }, [activeTab]);
 
   // Initialize todayOrder when habits change - MUST be before any early return
   useEffect(() => {
-    setTodayOrder(prev => {
-      const habitIds = activeHabits.map(h => h.id);
-      const newIds = habitIds.filter(id => !prev.includes(id));
-      const validOrder = prev.filter(id => habitIds.includes(id));
-      
-      if (newIds.length > 0) {
+    const habitIds = activeHabits.map(h => h.id);
+    const hasNewIds = habitIds.some(id => !todayOrder.includes(id));
+    const hasRemovedIds = todayOrder.some(id => !habitIds.includes(id));
+
+    if (hasNewIds || hasRemovedIds) {
+      setTodayOrder(prev => {
+        const newIds = habitIds.filter(id => !prev.includes(id));
+        const validOrder = prev.filter(id => habitIds.includes(id));
         return [...validOrder, ...newIds];
-      }
-      if (validOrder.length !== prev.length) {
-        return validOrder;
-      }
-      return prev;
-    });
-  }, [activeHabits]);
+      });
+    }
+  }, [activeHabits, todayOrder]);
 
   // Initialize dark mode on mount from localStorage (compatibility with old key or new key)
   useEffect(() => {

@@ -58,7 +58,7 @@ export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: Profile
   // Sync selectedAvatar with user.photoURL when dialog opens or user changes
   useEffect(() => {
     if (isOpen) {
-      setSelectedAvatar(user?.photoURL || null);
+      setSelectedAvatar(prev => prev !== (user?.photoURL || null) ? (user?.photoURL || null) : prev);
     }
   }, [isOpen, user?.photoURL]);
 

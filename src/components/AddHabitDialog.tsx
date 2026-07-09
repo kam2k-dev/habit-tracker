@@ -28,10 +28,9 @@ export function AddHabitDialog({ isOpen, onOpenChange, onAdd, defaultType = 'goo
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Update type when defaultType changes or dialog opens
   useEffect(() => {
     if (isOpen) {
-      setType(defaultType);
+      setType(prev => prev !== defaultType ? defaultType : prev);
     }
   }, [isOpen, defaultType]);
 

@@ -194,3 +194,4 @@ export function EmptyState({ onAddHabit: _onAddHabit, onAddFromTemplate }: Empty
 }
 
 export default EmptyState;
+

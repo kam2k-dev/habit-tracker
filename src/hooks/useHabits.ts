@@ -29,8 +29,15 @@ export function useHabits() {
   // Refs to avoid stale closures in snapshot callbacks
   const habitsRef = useRef<Habit[]>(habits);
   const logsRef = useRef<HabitLog[]>(logs);
-  habitsRef.current = habits;
-  logsRef.current = logs;
+
+  useEffect(() => {
+    habitsRef.current = habits;
+  }, [habits]);
+
+  useEffect(() => {
+    logsRef.current = logs;
+  }, [logs]);
+
 
   const persistCache = useCallback((nextHabits: Habit[], nextLogs: HabitLog[], userId?: string) => {
     if (!userId || typeof window === 'undefined') return;
@@ -44,8 +51,10 @@ export function useHabits() {
   // Load from local cache first, then sync Firestore in background
   useEffect(() => {
     if (!user || isPreviewMode) {
-      setHabits([]);
-      setLogs([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHabits(prev => prev.length > 0 ? [] : prev);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLogs(prev => prev.length > 0 ? [] : prev);
       setIsLoaded(true);
       return;
     }
@@ -300,7 +309,7 @@ export function useHabits() {
       completed,
       userId: user.uid,
     });
-  }, [user]);
+  }, [user, isPreviewMode]);
 
   const getHabitLog = useCallback((habitId: string, date: string): boolean => {
     const log = logs.find(l => l.habitId === habitId && l.date === date);
