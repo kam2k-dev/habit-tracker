@@ -4,62 +4,62 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 220 15% 20%;
+    --background: 60 5% 96%; /* stone-50 */
+    --foreground: 24 10% 10%; /* stone-900 */
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 20%;
+    --card-foreground: 24 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 20%;
-    --primary: 220 15% 25%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 210 15% 95%;
-    --secondary-foreground: 220 15% 25%;
-    --muted: 210 15% 95%;
-    --muted-foreground: 220 10% 50%;
-    --accent: 210 15% 95%;
-    --accent-foreground: 220 15% 25%;
-    --destructive: 0 70% 55%;
+    --popover-foreground: 24 10% 10%;
+    --primary: 152 76% 36%; /* emerald-600 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 5% 90%; /* stone-200 */
+    --secondary-foreground: 24 10% 10%;
+    --muted: 60 5% 90%;
+    --muted-foreground: 24 5% 45%; /* stone-500 */
+    --accent: 60 5% 90%;
+    --accent-foreground: 24 10% 10%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 10% 90%;
-    --input: 220 10% 90%;
-    --ring: 220 15% 25%;
-    --radius: 0.75rem;
+    --border: 60 5% 90%;
+    --input: 60 5% 90%;
+    --ring: 152 76% 36%;
+    --radius: 1rem;
 
     /* Custom colors for habit tracker */
-    --good-habit: 145 55% 45%;
-    --good-habit-light: 145 55% 92%;
-    --bad-habit: 0 65% 55%;
-    --bad-habit-light: 0 65% 95%;
-    --neutral-habit: 220 15% 75%;
+    --good-habit: 152 76% 36%;
+    --good-habit-light: 152 76% 90%;
+    --bad-habit: 11 80% 50%; /* terracotta-ish */
+    --bad-habit-light: 11 80% 95%;
+    --neutral-habit: 60 5% 75%;
   }
 
   .dark {
-    --background: 220 20% 12%;
-    --foreground: 210 15% 90%;
-    --card: 220 20% 16%;
-    --card-foreground: 210 15% 90%;
-    --popover: 220 20% 12%;
-    --popover-foreground: 210 15% 90%;
-    --primary: 210 15% 90%;
-    --primary-foreground: 220 20% 12%;
-    --secondary: 220 15% 24%;
-    --secondary-foreground: 210 15% 90%;
-    --muted: 220 15% 24%;
-    --muted-foreground: 210 10% 65%;
-    --accent: 220 15% 24%;
-    --accent-foreground: 210 15% 90%;
+    --background: 20 14% 4%; /* stone-950 */
+    --foreground: 60 5% 96%; /* stone-50 */
+    --card: 24 10% 10%; /* stone-900 */
+    --card-foreground: 60 5% 96%;
+    --popover: 24 10% 10%;
+    --popover-foreground: 60 5% 96%;
+    --primary: 152 69% 45%; /* emerald-500 */
+    --primary-foreground: 20 14% 4%;
+    --secondary: 24 10% 20%; /* stone-800 */
+    --secondary-foreground: 60 5% 96%;
+    --muted: 24 10% 20%;
+    --muted-foreground: 24 5% 65%; /* stone-400 */
+    --accent: 24 10% 20%;
+    --accent-foreground: 60 5% 96%;
     --destructive: 0 60% 55%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 15% 28%;
-    --input: 220 15% 28%;
-    --ring: 210 15% 85%;
+    --border: 24 10% 20%;
+    --input: 24 10% 20%;
+    --ring: 152 69% 45%;
 
     /* Custom colors for habit tracker - dark mode */
-    --good-habit: 145 50% 55%;
-    --good-habit-light: 145 30% 24%;
-    --bad-habit: 0 60% 65%;
-    --bad-habit-light: 0 30% 24%;
-    --neutral-habit: 220 15% 45%;
+    --good-habit: 152 69% 45%;
+    --good-habit-light: 152 69% 20%;
+    --bad-habit: 11 80% 60%;
+    --bad-habit-light: 11 80% 20%;
+    --neutral-habit: 24 10% 30%;
   }
 }
 

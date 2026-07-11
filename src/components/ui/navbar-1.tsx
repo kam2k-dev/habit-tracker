@@ -39,7 +39,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
 
   return (
     <div className="sticky top-4 z-50 flex justify-center w-full px-4">
-      <div className="flex items-center justify-between px-4 md:px-6 py-2 md:py-2.5 bg-card/95 backdrop-blur-sm rounded-full shadow-lg border border-border w-full max-w-4xl relative">
+      <div className="flex items-center justify-between px-4 md:px-6 py-2 md:py-2.5 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md rounded-full shadow-lg border border-border/50 w-full max-w-4xl relative">
         {/* Logo */}
         <motion.div
           className="flex items-center cursor-pointer -ml-1"

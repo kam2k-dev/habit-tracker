@@ -20,21 +20,21 @@ interface StatsOverviewProps {
 export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isStreakDialogOpen, setIsStreakDialogOpen] = useState(false);
-  
+
   const stats = useMemo(() => {
     const goodHabits = habits.filter(h => h.type === 'good');
     const badHabits = habits.filter(h => h.type === 'bad');
-    
+
     let totalGoodStreak = 0;
     let maxGoodStreak = 0;
     let totalGoodCompleted = 0;
     let goodCompletionRate = 0;
-    
+
     let totalBadStreak = 0;
     let maxBadStreak = 0;
     let totalBadCompleted = 0;
     let badCompletionRate = 0;
-    
+
     goodHabits.forEach(habit => {
       const habitStats = getHabitStats(habit.id);
       totalGoodStreak += habitStats.currentStreak;
@@ -42,7 +42,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
       totalGoodCompleted += habitStats.totalCompleted;
       goodCompletionRate += habitStats.completionRate;
     });
-    
+
     badHabits.forEach(habit => {
       const habitStats = getHabitStats(habit.id);
       totalBadStreak += habitStats.currentStreak;
@@ -50,15 +50,15 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
       totalBadCompleted += habitStats.totalCompleted;
       badCompletionRate += habitStats.completionRate;
     });
-    
-    const avgGoodCompletionRate = goodHabits.length > 0 
-      ? Math.round(goodCompletionRate / goodHabits.length) 
+
+    const avgGoodCompletionRate = goodHabits.length > 0
+      ? Math.round(goodCompletionRate / goodHabits.length)
       : 0;
-    
-    const avgBadCompletionRate = badHabits.length > 0 
-      ? Math.round(badCompletionRate / badHabits.length) 
+
+    const avgBadCompletionRate = badHabits.length > 0
+      ? Math.round(badCompletionRate / badHabits.length)
       : 0;
-    
+
     return {
       goodHabitsCount: goodHabits.length,
       badHabitsCount: badHabits.length,
@@ -77,7 +77,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
     const today = new Date();
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(today.getDate() - 30);
-    
+
     const fifteenDaysAgo = new Date(today);
     fifteenDaysAgo.setDate(today.getDate() - 15);
 
@@ -87,19 +87,19 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
     // Calculate trend for each habit by comparing first 15 days vs last 15 days
     const calculateTrend = (habitId: string) => {
       const habitLogs = logs.filter(l => l.habitId === habitId && new Date(l.date) >= thirtyDaysAgo);
-      
+
       const firstHalfLogs = habitLogs.filter(l => new Date(l.date) < fifteenDaysAgo);
       const secondHalfLogs = habitLogs.filter(l => new Date(l.date) >= fifteenDaysAgo);
-      
-      const firstHalfRate = firstHalfLogs.length > 0 
-        ? firstHalfLogs.filter(l => l.completed).length / 15 * 100 
+
+      const firstHalfRate = firstHalfLogs.length > 0
+        ? firstHalfLogs.filter(l => l.completed).length / 15 * 100
         : 0;
-      const secondHalfRate = secondHalfLogs.length > 0 
-        ? secondHalfLogs.filter(l => l.completed).length / 15 * 100 
+      const secondHalfRate = secondHalfLogs.length > 0
+        ? secondHalfLogs.filter(l => l.completed).length / 15 * 100
         : 0;
-      
+
       const change = secondHalfRate - firstHalfRate;
-      
+
       return {
         firstHalfRate: Math.round(firstHalfRate),
         secondHalfRate: Math.round(secondHalfRate),
@@ -188,8 +188,8 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {statCards.map((card, index) => (
-          <Card 
-            key={index} 
+          <Card
+            key={index}
             className={`p-4 ${card.title === 'Rate Penyelesaian' || card.title === 'Streak Tertinggi' ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}`}
             onClick={card.title === 'Rate Penyelesaian' ? () => setIsDialogOpen(true) : card.title === 'Streak Tertinggi' ? () => setIsStreakDialogOpen(true) : undefined}
           >
@@ -277,7 +277,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                             </span>
                           </div>
                           <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                            <motion.div 
+                            <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${h.trend.secondHalfRate}%` }}
                               transition={{ duration: 1, ease: "easeOut" }}
@@ -289,7 +289,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                     </div>
                   </div>
                 )}
-                
+
                 {/* Good Habits Stopped */}
                 {habitDetails.goodStopped.length > 0 && (
                   <div className="space-y-3 pt-2">
@@ -304,7 +304,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                             </span>
                           </div>
                           <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                            <motion.div 
+                            <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${h.trend.secondHalfRate}%` }}
                               transition={{ duration: 1, ease: "easeOut" }}
@@ -383,7 +383,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                           </div>
                         </div>
                         <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                          <motion.div 
+                          <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min((h.stats.currentStreak / 30) * 100, 100)}%` }}
                             transition={{ duration: 1, ease: "easeOut" }}
@@ -421,7 +421,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                           </div>
                         </div>
                         <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                          <motion.div 
+                          <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min((h.stats.currentStreak / 30) * 100, 100)}%` }}
                             transition={{ duration: 1, ease: "easeOut" }}

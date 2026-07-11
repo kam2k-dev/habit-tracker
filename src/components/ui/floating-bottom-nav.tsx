@@ -45,12 +45,15 @@ export function FloatingBottomNav({
       {/* Bar wrapper */}
       <div
         className={cn(
-          'relative isolate flex items-center justify-between overflow-visible border border-white/20 dark:border-white/10 backdrop-blur-[24px] backdrop-saturate-200 h-16 px-4 rounded-[32px]',
-          'before:pointer-events-none before:absolute before:inset-[1px] before:-z-10 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/30 before:via-white/10 before:to-white/5',
-          'dark:border-white/10 dark:before:from-white/10 dark:before:via-white/5 dark:before:to-white/2',
-          /* Light / dark base - iOS liquid frosted look */
-          'bg-white/60 dark:bg-slate-950/60 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.15),inset_0_1px_1px_rgba(255,255,255,0.4)] ring-1 ring-white/10',
-          'dark:shadow-[0_18px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.05)] dark:ring-white/5',
+          'relative isolate flex items-center justify-between overflow-visible h-16 px-4 rounded-[32px]',
+          /* Blur & Saturation (iOS Material effect) */
+          'backdrop-blur-[40px] backdrop-saturate-[180%]',
+          /* Background Opacity (WhatsApp iOS style uses a milky/dark translucent background) */
+          'bg-white/40 dark:bg-[#1c1c1e]/50',
+          /* Thin subtle border */
+          'border border-black/5 dark:border-white/10',
+          /* Shadow for depth */
+          'shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]',
         )}
       >
         {/* Subtle radial highlight */}
