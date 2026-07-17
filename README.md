@@ -1,73 +1,136 @@
-# ⚡ Tracker Kebiasaan (Habit Tracker) - Premium Web App
+<div align="center">
 
-Aplikasi web pelacak kebiasaan modern, cepat, dan interaktif yang dibangun menggunakan **React 19**, **TypeScript**, **Vite**, **Tailwind CSS**, dan **Firebase**. Aplikasi ini dirancang untuk membantumu membangun rutinitas positif ("Kebiasaan Baik") sekaligus menyadari dan mengurangi pola negatif ("Kebiasaan Buruk") dengan antarmuka yang sangat responsif, animasi premium, dan pelacakan statistik real-time.
+<img src="public/logo.webp" alt="Habit Tracker Logo" width="96" />
 
----
+# ⚡ Habit Tracker
 
-## ✨ Fitur Utama
+**Bangun kebiasaan baik, kurangi kebiasaan buruk, dan jaga konsistensi setiap hari.**
 
-- **👥 Mode Tamu & Sinkronisasi Cloud (Firebase)**:
-  - **Mode Pratinjau (Preview Mode)**: Mulai melacak secara instan tanpa perlu mendaftar. Data disimpan langsung di memori lokal.
-  - **Autentikasi Firebase**: Masuk menggunakan Google Sign-In atau Email/Password untuk menyimpan data secara aman di Cloud Firestore.
-  - **Sinkronisasi Real-time & Offline Cache**: Data disinkronkan secara real-time ke Firestore dengan dukungan caching offline di `localStorage` untuk performa instan (PWA-like).
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-11-DD2C00?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-- **🎯 Pelacakan Kebiasaan Baik & Buruk**:
-  - **Kebiasaan Baik**: Lacak dan bangun kebiasaan sehat (seperti olahraga, meditasi, membaca).
-  - **Kebiasaan Buruk**: Pantau dan kurangi perilaku negatif (seperti doomscrolling, merokok, makanan tidak sehat) dengan skor netral/pengurangan.
+Aplikasi habit tracker modern dengan cloud sync, statistik interaktif, streak, heatmap aktivitas, dark mode, dan pengalaman mobile yang responsif.
 
-- **📊 Dashboard & Statistik Interaktif**:
-  - **Daily Hero**: Ringkasan performa harian yang dinamis menampilkan skor netral, jumlah kebiasaan yang selesai, dan status streak aktif saat ini.
-  - **Grafik Aktivitas (Heatmap Git-Style)**: Visualisasi aktivitas pelacakan selama 365 hari terakhir lengkap dengan detail performa saat tanggal diklik.
-  - **Stats & Streak Tracker**: Analisis mendalam yang menghitung streak saat ini, streak terpanjang, total penyelesaian, dan tingkat konsistensi (%) untuk setiap kebiasaan.
-
-- **⚡ Pengalaman Pengguna (UX) Premium**:
-  - **Drag & Drop Reordering**: Urutkan daftar kebiasaan hari ini dengan mudah melalui gesture drag-and-drop.
-  - **iOS-style Haptic Feedback**: Getaran mikro (haptic feedback) menggunakan navigator haptic pada perangkat seluler ketika kebiasaan selesai atau diatur ulang.
-  - **Animasi Transisi & Confetti**: Efek transisi halus berbasis *Framer Motion* dan selebrasi *Canvas Confetti* saat mencapai target atau menyelesaikan tugas.
-  - **Kustomisasi Avatar**: Unggah atau ubah avatar profil kustom yang tersimpan secara lokal.
-  - **Tema Gelap & Terang**: Dukungan dark mode elegan yang terintegrasi dengan preferensi sistem atau pilihan manual.
+</div>
 
 ---
 
-## 🛠️ Tech Stack
+## Tentang
 
-Aplikasi ini menggunakan teknologi modern terbaik untuk memastikan performa yang cepat dan pengalaman pengguna yang mulus:
+Habit Tracker adalah aplikasi web untuk membangun rutinitas positif sekaligus memantau kebiasaan yang ingin dikurangi. Aplikasi dapat digunakan dalam **Preview Mode** tanpa akun, atau melalui Firebase Authentication agar data tersimpan dan tersinkronisasi di Cloud Firestore.
 
-- **Core**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vite.dev/)
-- **Database & Auth**: [Firebase v11](https://firebase.google.com/) (Firestore & Auth)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) dengan [Shadcn UI](https://ui.shadcn.com/) & [Radix UI](https://www.radix-ui.com/)
-- **Animasi**: [Framer Motion](https://www.framer.com/motion/) & [Canvas Confetti](https://github.com/catdad/canvas-confetti)
-- **Manajemen Tanggal**: [date-fns](https://date-fns.org/)
-- **Notifikasi**: [Sonner](https://sonner.emilkowalski.se/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+> Cepat, responsif, mobile-friendly, dan bisa dijalankan secara lokal maupun melalui Docker.
 
----
+## Fitur Utama
 
-## 🚀 Memulai (Quick Start)
+### Pelacakan kebiasaan
 
-Ikuti langkah-langkah di bawah ini untuk menjalankan proyek ini secara lokal di komputermu:
+- Tambah kebiasaan baik dan buruk.
+- Tandai kebiasaan berdasarkan tanggal.
+- Susun ulang daftar kebiasaan hari ini.
+- Gunakan template seperti *Morning Routine*, *Fitness*, dan *Reading*.
+- Pantau streak saat ini, streak terpanjang, total penyelesaian, dan konsistensi.
 
-### 1. Prasyarat (Prerequisites)
+### Dashboard dan statistik
 
-Pastikan kamu sudah menginstal:
-- [Node.js](https://nodejs.org/) (versi 18 atau lebih baru direkomendasikan)
-- [npm](https://www.npmjs.com/) atau Yarn / pnpm
+- Ringkasan performa harian melalui **Daily Hero**.
+- Heatmap aktivitas bergaya GitHub untuk 365 hari.
+- Detail performa ketika tanggal dipilih.
+- Statistik terpisah untuk setiap kebiasaan.
+- Animasi angka, transisi Framer Motion, dan confetti saat target tercapai.
 
-### 2. Instalasi Dependensi
+### Akun dan sinkronisasi
 
-Jalankan perintah berikut pada terminal di dalam folder proyek:
+- Preview Mode tanpa registrasi.
+- Firebase Authentication dengan Google dan email/password.
+- Penyimpanan data pengguna di Cloud Firestore.
+- Cache lokal untuk pengalaman yang lebih cepat.
+- Avatar profil bawaan maupun custom.
+
+### Pengalaman pengguna
+
+- Responsive top navigation dan floating bottom navigation.
+- Dark mode dan light mode.
+- Haptic feedback pada perangkat yang mendukung.
+- Toast notification melalui Sonner.
+- UI berbasis Radix UI dan pola komponen shadcn/ui.
+
+## Tech Stack
+
+| Bagian | Teknologi | Kegunaan |
+|---|---|---|
+| UI framework | React 19 | Antarmuka komponen dan state UI |
+| Bahasa | TypeScript 5.9 | Type safety dan maintainability |
+| Build tool | Vite 7 | Development server dan production build |
+| Styling | Tailwind CSS 3.4 | Responsive styling dan dark mode |
+| UI primitives | Radix UI | Komponen aksesibel seperti dialog, tabs, dan dropdown |
+| Backend service | Firebase 11 | Authentication dan Cloud Firestore |
+| Animasi | Framer Motion | Transisi dan micro-interactions |
+| Utilities | date-fns | Pengolahan tanggal dan statistik streak |
+| Container | Docker | Build dan deployment yang konsisten |
+
+## Struktur Project
+
+```text
+habit-tracker/
+├── public/                 # Logo, favicon, dan avatar bawaan
+├── src/
+│   ├── components/         # Komponen fitur dan dashboard
+│   │   ├── icons/          # Ikon kebiasaan custom
+│   │   └── ui/             # Komponen UI reusable
+│   ├── hooks/              # Auth, habit state, confetti, count-up
+│   ├── lib/                # Firebase initialization dan utilities
+│   ├── types/              # TypeScript types
+│   ├── App.tsx             # Layout dan alur utama aplikasi
+│   ├── index.css           # Global style dan Tailwind
+│   └── main.tsx            # Entry point React
+├── .env.example            # Template konfigurasi Firebase
+├── Dockerfile              # Multi-stage production image
+├── docker-compose.yml      # Deployment container pada port 5050
+└── package.json            # Scripts dan dependencies
+```
+
+## Menjalankan Secara Lokal
+
+### Prasyarat
+
+- Node.js 20 direkomendasikan—sesuai image yang dipakai Docker.
+- npm.
+- Firebase project jika ingin menggunakan login dan cloud sync.
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/kam2k-dev/habit-tracker.git
+cd habit-tracker
+```
+
+### 2. Instal dependensi
+
 ```bash
 npm install
 ```
 
-### 3. Konfigurasi Environment Variables
+### 3. Konfigurasi Firebase
 
-Salin berkas `.env.example` menjadi `.env` dan masukkan kredensial Firebase milikmu:
+Salin template environment:
+
 ```bash
 cp .env.example .env
 ```
 
-Buka berkas `.env` baru tersebut, lalu isi dengan konfigurasi dari Firebase Console:
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Isi konfigurasi dari **Firebase Console → Project Settings → General → Your apps → Web app**:
+
 ```env
 VITE_FIREBASE_API_KEY=your_api_key_here
 VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
@@ -77,47 +140,74 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=1:123456789:web:abcdef123456
 ```
 
-### 4. Menjalankan Aplikasi di Mode Development
+Aktifkan provider autentikasi yang akan digunakan di Firebase Console, lalu siapkan aturan akses Firestore yang sesuai untuk data pengguna.
 
-Mulai server lokal menggunakan perintah berikut:
+> File `.env` bersifat lokal dan diabaikan oleh Git. Jangan commit konfigurasi produksi atau service-account/private key ke repository.
+
+### 4. Development server
+
 ```bash
 npm run dev
 ```
-Aplikasi akan berjalan secara lokal di [http://localhost:5173](http://localhost:5173).
 
-### 5. Build untuk Produksi
+Buka [http://localhost:5173](http://localhost:5173).
 
-Untuk melakukan kompilasi kode dan build untuk disebarkan (deploy) ke hosting produksi:
+## Scripts
+
+| Perintah | Fungsi |
+|---|---|
+| `npm run dev` | Menjalankan Vite development server |
+| `npm run build` | Type-check dan membuat production build |
+| `npm run lint` | Menjalankan ESLint |
+| `npm run preview` | Preview hasil build secara lokal |
+
+## Build Produksi
+
 ```bash
 npm run build
 ```
-Hasil build siap pakai akan tersedia di dalam folder `/dist`.
 
----
+Hasil build berada di direktori `dist/`.
 
-## 📁 Struktur Folder
+## Menjalankan dengan Docker
 
-```text
-habit-tracker/
-├── src/
-│   ├── components/      # Komponen UI (AddHabitDialog, StatsOverview, dll)
-│   │   ├── ui/          # Komponen dasar (Shadcn/Radix components)
-│   │   └── icons/       # Custom icons untuk kebiasaan
-│   ├── hooks/           # Custom React hooks (useAuth, useHabits, useConfetti)
-│   ├── lib/             # Inisialisasi Firebase & Utilitas
-│   ├── types/           # Definisi Type TypeScript (habit.ts)
-│   ├── App.tsx          # Halaman utama & layouting aplikasi
-│   ├── index.css        # Konfigurasi Tailwind & Global styling
-│   └── main.tsx         # Entry point aplikasi
-├── public/              # Aset statis aplikasi
-├── .env.example         # Template file environment variables
-├── Dockerfile           # Konfigurasi Docker
-├── docker-compose.yml   # Konfigurasi Docker Compose
-└── tailwind.config.js   # Konfigurasi Tailwind CSS
+Pastikan `.env` sudah dikonfigurasi, kemudian jalankan:
+
+```bash
+docker compose up --build -d
 ```
 
----
+Aplikasi tersedia di:
 
-## 🔒 Lisensi
+```text
+http://localhost:5050
+```
 
-Proyek ini dibuat untuk keperluan pembelajaran dan pengembangan pribadi. Silakan gunakan dan sesuaikan sesuai dengan kebutuhanmu.
+Cek log atau hentikan container:
+
+```bash
+docker compose logs -f
+docker compose down
+```
+
+## Keamanan Konfigurasi Firebase
+
+Firebase Web API key bukan pengganti autentikasi dan bukan private server key. Keamanan data tetap harus dijaga melalui:
+
+- Firebase Authentication.
+- Firestore Security Rules berbasis `request.auth.uid`.
+- Pembatasan API key pada Google Cloud Console bila diperlukan.
+- Tidak mengunggah service-account key atau kredensial admin ke frontend/repository.
+- Menyimpan konfigurasi deployment di environment platform masing-masing.
+
+## Roadmap
+
+- [ ] Reminder dan notifikasi kebiasaan.
+- [ ] PWA installable dengan service worker.
+- [ ] Export/import data pengguna.
+- [ ] Pengaturan target mingguan yang lebih fleksibel.
+- [ ] Automated test untuk hook, statistik, dan alur autentikasi.
+
+## Lisensi
+
+Belum ada lisensi open-source yang ditetapkan. Secara default, seluruh hak cipta tetap dimiliki pemilik repository.
