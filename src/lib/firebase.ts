@@ -1,6 +1,6 @@
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app\;
-import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth\;
-import { getFirestore } from 'firebase/firestore\;
+import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const isProd = import.meta.env.PROD;
 if (!isProd) {
-  console.log('Firebase config:\, {
+  console.log("Firebase config:", {
     projectId: firebaseConfig.projectId,
     authDomain: firebaseConfig.authDomain,
     hasApiKey: !!firebaseConfig.apiKey,
@@ -29,7 +29,7 @@ try {
     app = initializeApp(firebaseConfig);
   }
 } catch (error: any) {
-  console.error('Firebase initialization error:\, error.message || error);
+  console.error("Firebase initialization error:", error.message || error);
 }
 
 export const auth = getAuth(app as any);
@@ -37,7 +37,7 @@ export const db = getFirestore(app as any);
 export const googleProvider = new GoogleAuthProvider();
 
 setPersistence(auth, browserLocalPersistence).catch((err) => {
-  console.warn('Auth persistence failed (Brave may block IndexedDB):\, err);
+  console.warn("Auth persistence failed (Brave may block IndexedDB):", err);
 });
 
 export default app;
