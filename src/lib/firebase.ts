@@ -1,9 +1,7 @@
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app\;
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth\;
+import { getFirestore } from 'firebase/firestore\;
 
-// Firebase configuration - you'll need to replace these with your own Firebase project config
-// Get these from Firebase Console > Project Settings > General > Your apps > Web app
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -13,17 +11,15 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Debug: log config (remove in production)
 const isProd = import.meta.env.PROD;
 if (!isProd) {
-  console.log('Firebase config:', {
+  console.log('Firebase config:\, {
     projectId: firebaseConfig.projectId,
     authDomain: firebaseConfig.authDomain,
     hasApiKey: !!firebaseConfig.apiKey,
   });
 }
 
-// Initialize Firebase - with fallback for missing config
 let app: FirebaseApp | undefined;
 try {
   const existingApps = getApps();
@@ -33,17 +29,15 @@ try {
     app = initializeApp(firebaseConfig);
   }
 } catch (error: any) {
-  console.error('Firebase initialization error:', error.message || error);
+  console.error('Firebase initialization error:\, error.message || error);
 }
 
-// Initialize services - handle undefined app gracefully by casting for now
 export const auth = getAuth(app as any);
 export const db = getFirestore(app as any);
 export const googleProvider = new GoogleAuthProvider();
 
-// Set auth persistence to localStorage fallback for Brave/blocking browsers
 setPersistence(auth, browserLocalPersistence).catch((err) => {
-  console.warn('Auth persistence failed (Brave may block IndexedDB):', err);
+  console.warn('Auth persistence failed (Brave may block IndexedDB):\, err);
 });
 
 export default app;
