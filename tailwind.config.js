@@ -4,9 +4,6 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      transitionTimingFunction: {
-        "bouncy": "cubic-bezier(0.34, 1.56, 0.64, 1)",
-      },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
