@@ -11,33 +11,19 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const isProd = import.meta.env.PROD;
-if (!isProd) {
-  console.log("Firebase config:", {
-    projectId: firebaseConfig.projectId,
-    authDomain: firebaseConfig.authDomain,
-    hasApiKey: !!firebaseConfig.apiKey,
-  });
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
 }
 
-let app: FirebaseApp | undefined;
-try {
-  const existingApps = getApps();
-  if (existingApps.length > 0) {
-    app = existingApps[0];
-  } else {
-    app = initializeApp(firebaseConfig);
-  }
-} catch (error: any) {
-  console.error("Firebase initialization error:", error.message || error);
-}
-
-export const auth = getAuth(app as any);
-export const db = getFirestore(app as any);
-export const googleProvider = new GoogleAuthProvider();
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
 
 setPersistence(auth, browserLocalPersistence).catch((err) => {
-  console.warn("Auth persistence failed (Brave may block IndexedDB):", err);
+  console.warn("Auth persistence failed:", err);
 });
 
-export default app;
+export { auth, db, googleProvider };
