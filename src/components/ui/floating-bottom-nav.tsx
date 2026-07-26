@@ -47,7 +47,7 @@ export function FloatingBottomNav({
       {/* Bar wrapper */}
       <div
         className={cn(
-          'relative isolate flex items-center justify-between overflow-hidden h-[54px] p-1 rounded-[27px]',
+          'relative flex items-center justify-between overflow-visible h-[54px] p-1 rounded-[27px]',
           /* Blur & Saturation (iOS Material effect) */
           'backdrop-blur-[40px] backdrop-saturate-[180%]',
           /* Background Opacity (WhatsApp iOS style uses a milky/dark translucent background) */
@@ -58,31 +58,31 @@ export function FloatingBottomNav({
           'shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)]',
         )}
       >
-        {/* Subtle radial highlight */}
-        <div className="pointer-events-none absolute inset-0 -z-20 rounded-[inherit] bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.55),transparent_28%),radial-gradient(circle_at_82%_88%,rgba(255,255,255,0.18),transparent_36%)] opacity-80 dark:opacity-30" />
+        {/* Subtle radial highlight inside clipped background */}
+        <div className="pointer-events-none absolute inset-0 -z-20 rounded-[inherit] overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.55),transparent_28%),radial-gradient(circle_at_82%_88%,rgba(255,255,255,0.18),transparent_36%)] opacity-80 dark:opacity-30" />
 
         {items.map((item) => {
           const isActive = activeTab === item.id;
           const isAdd = item.id === 'add';
           const Icon = item.icon;
 
-          /* ---- FAB (centre) ---- */
+          /* ---- FAB (centre - Top Layer z-30) ---- */
           if (isAdd) {
             return (
               <button
                 key={item.id}
                 onClick={onAddClick}
                 aria-label="Tambah habit"
-                className="relative z-10 flex flex-col items-center justify-center rounded-[23px] w-[19%] h-full"
+                className="relative z-30 flex flex-col items-center justify-center rounded-full w-[19%] h-full overflow-visible"
               >
                 <motion.div
-                  whileHover={{ scale: 1.08, rotate: 90 }}
-                  whileTap={{ scale: 0.9, rotate: 180 }}
+                  whileHover={{ scale: 1.12, rotate: 90 }}
+                  whileTap={{ scale: 0.88, rotate: 180 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 20 }}
                   className={cn(
-                    'relative flex items-center justify-center rounded-[23px] border border-white/50 bg-white/40 backdrop-blur-xl h-full w-full',
-                    'shadow-[0_4px_16px_rgba(15,23,42,0.12),inset_0_1px_1px_rgba(255,255,255,0.7)]',
-                    'dark:border-white/15 dark:bg-white/[0.12] dark:shadow-[0_4px_16px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.18)]',
+                    'relative z-30 flex items-center justify-center rounded-full border border-white/60 bg-white/50 backdrop-blur-2xl h-[46px] w-[46px] mx-auto',
+                    'shadow-[0_4px_18px_rgba(15,23,42,0.15),inset_0_1px_1px_rgba(255,255,255,0.8)]',
+                    'dark:border-white/20 dark:bg-white/[0.15] dark:shadow-[0_4px_18px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.2)]',
                   )}
                 >
                   <Plus className="text-foreground drop-shadow-sm dark:text-white h-5 w-5" />
@@ -98,15 +98,15 @@ export function FloatingBottomNav({
               onClick={() => onTabChange(item.id)}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="relative z-10 flex flex-col items-center justify-center w-[19%] h-full rounded-[23px] overflow-hidden"
+              className="relative z-10 flex flex-col items-center justify-center w-[19%] h-full rounded-[23px] md:rounded-full group hover:rounded-full transition-all duration-300 overflow-hidden"
             >
-              {/* iOS Liquid Glass Sliding Pill Indicator (Compact Inset Fit - Zero Leftover Space) */}
+              {/* iOS Liquid Glass Sliding Pill Indicator (Desktop Circular Hover & Inset Fit) */}
               {isActive && (
                 <motion.div
                   layoutId="activeTabPill"
                   layout="position"
                   className={cn(
-                    "absolute inset-0 rounded-[23px] -z-10 backdrop-blur-xl border border-transparent transition-colors duration-300",
+                    "absolute inset-0 rounded-[23px] md:rounded-full -z-10 backdrop-blur-xl border border-transparent transition-colors duration-300",
                     item.id === 'today' && "bg-blue-500/25 dark:bg-blue-500/35 shadow-[0_2px_16px_rgba(59,130,246,0.4)] dark:shadow-[0_2px_16px_rgba(59,130,246,0.5)]",
                     item.id === 'good' && "bg-emerald-500/25 dark:bg-emerald-500/35 shadow-[0_2px_16px_rgba(16,185,129,0.4)] dark:shadow-[0_2px_16px_rgba(16,185,129,0.5)]",
                     item.id === 'bad' && "bg-rose-500/25 dark:bg-rose-500/35 shadow-[0_2px_16px_rgba(244,63,94,0.4)] dark:shadow-[0_2px_16px_rgba(244,63,94,0.5)]",

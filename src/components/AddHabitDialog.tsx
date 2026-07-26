@@ -119,6 +119,10 @@ export function AddHabitDialog({ isOpen, onOpenChange, onAdd, defaultType = 'goo
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSubmit();
               }}
+              className={type === 'good' 
+                ? 'border-emerald-500/60 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/30 selection:bg-emerald-500/20 rounded-2xl h-11 px-4 transition-all duration-300'
+                : 'border-rose-500/60 focus-visible:border-rose-500 focus-visible:ring-rose-500/30 selection:bg-rose-500/20 rounded-2xl h-11 px-4 transition-all duration-300'
+              }
             />
             {error && (
               <p className="text-xs text-destructive">{error}</p>
