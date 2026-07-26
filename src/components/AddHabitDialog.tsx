@@ -8,6 +8,7 @@ import type { HabitType } from '@/types/habit';
 import { Plus } from 'lucide-react';
 import { BadHabitIcon } from '@/components/icons/BadHabitIcon';
 import { GoodHabitIcon } from '@/components/icons/GoodHabitIcon';
+import { useLanguage } from '@/context/language-context';
 
 // Check if device is touch/mobile
 const isTouchDevice = () => {
@@ -23,6 +24,7 @@ interface AddHabitDialogProps {
 }
 
 export function AddHabitDialog({ isOpen, onOpenChange, onAdd, defaultType = 'good' }: AddHabitDialogProps) {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [type, setType] = useState<HabitType>(defaultType);
   const [error, setError] = useState('');
@@ -46,7 +48,7 @@ export function AddHabitDialog({ isOpen, onOpenChange, onAdd, defaultType = 'goo
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      setError('Nama kebiasaan tidak boleh kosong');
+      setError(t('addHabit.habitNamePlaceholder'));
       return;
     }
     
@@ -66,43 +68,43 @@ export function AddHabitDialog({ isOpen, onOpenChange, onAdd, defaultType = 'goo
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md rounded-3xl origin-bottom data-[state=open]:animate-genie-in data-[state=closed]:animate-genie-out">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Tambah Kebiasaan Baru
+            {t('addHabit.addTitle')}
           </DialogTitle>
           <DialogDescription>
-            Tambahkan kebiasaan yang ingin kamu track setiap hari.
+            {t('addHabit.goodTypeDesc')}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
           {/* Habit Type Selection */}
           <div className="space-y-2">
-            <Label>Jenis Kebiasaan</Label>
+            <Label>{t('addHabit.typeLabel')}</Label>
             <Tabs value={type} onValueChange={(v) => setType(v as HabitType)} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="good" className="flex items-center gap-2">
                   <GoodHabitIcon className="h-4 w-4 text-emerald-500" />
-                  Baik
+                  {t('tabs.good')}
                 </TabsTrigger>
                 <TabsTrigger value="bad" className="flex items-center gap-2">
                   <BadHabitIcon className="h-4 w-4 text-rose-500" />
-                  Buruk
+                  {t('tabs.bad')}
                 </TabsTrigger>
               </TabsList>
             </Tabs>
             <p className="text-xs text-muted-foreground">
               {type === 'good' 
-                ? 'Kebiasaan baik yang ingin kamu bangun dan pertahankan.' 
-                : 'Kebiasaan buruk yang ingin kamu kurangi atau hilangkan.'}
+                ? t('addHabit.goodTypeDesc') 
+                : t('addHabit.badTypeDesc')}
             </p>
           </div>
 
           {/* Habit Name */}
           <div className="space-y-2">
-            <Label htmlFor="habit-name">Nama Kebiasaan</Label>
+            <Label htmlFor="habit-name">{t('addHabit.habitNameLabel')}</Label>
             <Input
               ref={inputRef}
               id="habit-name"
@@ -113,7 +115,7 @@ export function AddHabitDialog({ isOpen, onOpenChange, onAdd, defaultType = 'goo
                 setName(e.target.value);
                 setError('');
               }}
-              placeholder={type === 'good' ? 'Contoh: Olahraga 30 menit' : 'Contoh: Main HP sebelum tidur'}
+              placeholder={t('addHabit.habitNamePlaceholder')}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSubmit();
               }}
@@ -126,13 +128,13 @@ export function AddHabitDialog({ isOpen, onOpenChange, onAdd, defaultType = 'goo
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            Batal
+            {t('addHabit.cancelButton')}
           </Button>
           <Button 
             onClick={handleSubmit}
             className={type === 'good' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'}
           >
-            Tambah Kebiasaan
+            {t('addHabit.saveButton')}
           </Button>
         </DialogFooter>
       </DialogContent>

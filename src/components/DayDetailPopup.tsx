@@ -3,7 +3,8 @@ import { XCircle, CheckCircle2 } from 'lucide-react';
 import { GoodHabitIcon } from '@/components/icons/GoodHabitIcon';
 import { BadHabitIcon } from '@/components/icons/BadHabitIcon';
 import { format, parseISO } from 'date-fns';
-import { id } from 'date-fns/locale';
+import { id, enUS } from 'date-fns/locale';
+import { useLanguage } from '@/context/language-context';
 
 interface DayDetail {
   date: string;
@@ -18,18 +19,20 @@ interface DayDetailPopupProps {
 }
 
 export function DayDetailPopup({ isOpen, onClose, detail }: DayDetailPopupProps) {
+  const { t, language } = useLanguage();
   if (!detail) return null;
 
   const goodCompleted = detail.goodHabits.filter(h => h.completed).length;
   const badCompleted = detail.badHabits.filter(h => h.completed).length;
   const netScore = goodCompleted - badCompleted;
+  const dateLocale = language === 'id' ? id : enUS;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">
-            {format(parseISO(detail.date), 'EEEE, d MMMM yyyy', { locale: id })}
+            {format(parseISO(detail.date), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
           </DialogTitle>
         </DialogHeader>
 
@@ -40,7 +43,7 @@ export function DayDetailPopup({ isOpen, onClose, detail }: DayDetailPopupProps)
             netScore < 0 ? 'bg-rose-50 border border-rose-100' : 
             'bg-muted'
           }`}>
-            <p className="text-sm text-muted-foreground mb-1">Skor Hari Ini</p>
+            <p className="text-sm text-muted-foreground mb-1">{t('dayDetail.title')}</p>
             <p className={`text-3xl font-bold ${
               netScore > 0 ? 'text-emerald-600' : 
               netScore < 0 ? 'text-rose-600' : 
@@ -49,7 +52,7 @@ export function DayDetailPopup({ isOpen, onClose, detail }: DayDetailPopupProps)
               {netScore > 0 ? '+' : ''}{netScore}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {goodCompleted} baik - {badCompleted} buruk
+              {goodCompleted} {t('tabs.good')} - {badCompleted} {t('tabs.bad')}
             </p>
           </div>
 
@@ -57,13 +60,13 @@ export function DayDetailPopup({ isOpen, onClose, detail }: DayDetailPopupProps)
           <div>
             <h4 className="text-sm font-medium flex items-center gap-2 mb-3">
               <GoodHabitIcon className="h-4 w-4 text-emerald-500" />
-              Kebiasaan Baik
+              {t('stats.goodHabits')}
               <span className="text-xs text-muted-foreground">
                 ({goodCompleted}/{detail.goodHabits.length})
               </span>
             </h4>
             {detail.goodHabits.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">Tidak ada kebiasaan baik</p>
+              <p className="text-sm text-muted-foreground italic">{t('emptyState.noGoodHabits')}</p>
             ) : (
               <div className="space-y-2">
                 {detail.goodHabits.map(habit => (
@@ -91,13 +94,13 @@ export function DayDetailPopup({ isOpen, onClose, detail }: DayDetailPopupProps)
           <div>
             <h4 className="text-sm font-medium flex items-center gap-2 mb-3">
               <BadHabitIcon className="h-4 w-4 text-rose-500" />
-              Kebiasaan Buruk
+              {t('stats.badHabits')}
               <span className="text-xs text-muted-foreground">
                 ({badCompleted}/{detail.badHabits.length})
               </span>
             </h4>
             {detail.badHabits.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">Tidak ada kebiasaan buruk</p>
+              <p className="text-sm text-muted-foreground italic">{t('emptyState.noBadHabits')}</p>
             ) : (
               <div className="space-y-2">
                 {detail.badHabits.map(habit => (

@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, LogOut, Trash2, Moon, Sun, User, UserCircle } from "lucide-react"
+import { X, LogOut, Trash2, Moon, Sun, User, UserCircle, Globe } from "lucide-react"
 import { ThemeSwitch } from "./theme-switch-button"
+import { LanguageSwitch } from "./language-switch"
 import { UserDropdown } from "./user-dropdown"
 import { ProfileDialog } from "./profile-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useLanguage } from "@/context/language-context";
 
 interface Navbar1Props {
   user: {
@@ -24,6 +26,7 @@ interface Navbar1Props {
 }
 
 const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteAll, onScrollToTop, onAvatarChange, isPreviewMode }: Navbar1Props) => {
+  const { t, language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -57,16 +60,17 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
             />
           </div>
           <div>
-            <h1 className="text-base md:text-sm font-semibold leading-tight">Habit Tracker</h1>
+            <h1 className="text-base md:text-sm font-semibold leading-tight">{t('nav.title')}</h1>
             <p className="text-xs md:text-[10px] text-muted-foreground leading-tight">
-              {activeHabitsCount} kebiasaan aktif
+              {activeHabitsCount} {t('nav.activeHabits')}
             </p>
           </div>
         </motion.div>
 
-        {/* Desktop: Theme Switch + User Dropdown */}
+        {/* Desktop: Language Switch + Theme Switch + User Dropdown */}
         {user && (
           <div className="hidden md:flex items-center gap-2">
+            <LanguageSwitch />
             <ThemeSwitch />
             {isPreviewMode ? (
               <div className="flex gap-2">
@@ -199,6 +203,23 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
               <div className="flex flex-col space-y-2">
                 {isPreviewMode ? (
                   <>
+                    {/* Language Switch for Mobile */}
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.12 }}
+                      onClick={() => setLanguage(language === 'id' ? 'en' : 'id')}
+                      className="flex items-center justify-between p-3 text-gray-600 dark:text-gray-400 hover:bg-muted rounded-xl transition-colors text-left w-full"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Globe className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        <span>{t('nav.language')}</span>
+                      </div>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase">
+                        {language === 'id' ? 'ID' : 'EN'}
+                      </span>
+                    </motion.button>
+
                     {/* Theme Toggle for Preview Mode */}
                     <motion.button
                       initial={{ opacity: 0, y: 10 }}
@@ -217,7 +238,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       ) : (
                         <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                       )}
-                      <span>Mode {theme === 'light' ? 'Gelap' : 'Terang'}</span>
+                      <span>{theme === 'light' ? t('nav.darkMode') : t('nav.lightMode')}</span>
                     </motion.button>
 
                     {/* Sign In button for Preview Mode */}
@@ -232,7 +253,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       className="flex items-center gap-3 p-3 bg-primary text-primary-foreground hover:opacity-90 rounded-xl transition-colors text-left font-semibold justify-center"
                     >
                       <LogOut className="h-5 w-5" />
-                      <span>Sign In / Sign Up</span>
+                      <span>{t('nav.signInSignUp')}</span>
                     </motion.button>
                   </>
                 ) : (
@@ -241,7 +262,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                     <motion.button
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.15 }}
+                      transition={{ delay: 0.12 }}
                       onClick={() => {
                         setIsProfileOpen(true)
                         toggleMenu()
@@ -249,7 +270,24 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       className="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-400 hover:bg-muted rounded-xl transition-colors text-left"
                     >
                       <UserCircle className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                      <span>Profil</span>
+                      <span>{t('nav.profile')}</span>
+                    </motion.button>
+
+                    {/* Language Switch for Mobile */}
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 }}
+                      onClick={() => setLanguage(language === 'id' ? 'en' : 'id')}
+                      className="flex items-center justify-between p-3 text-gray-600 dark:text-gray-400 hover:bg-muted rounded-xl transition-colors text-left w-full"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Globe className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        <span>{t('nav.language')}</span>
+                      </div>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase">
+                        {language === 'id' ? 'Bahasa Indonesia' : 'English'}
+                      </span>
                     </motion.button>
 
                     {/* Theme Toggle */}
@@ -270,7 +308,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       ) : (
                         <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                       )}
-                      <span>Mode {theme === 'light' ? 'Gelap' : 'Terang'}</span>
+                      <span>{theme === 'light' ? t('nav.darkMode') : t('nav.lightMode')}</span>
                     </motion.button>
 
                     {/* Delete All */}
@@ -285,7 +323,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       className="flex items-center gap-3 p-3 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left"
                     >
                       <Trash2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                      <span>Hapus Semua Kebiasaan</span>
+                      <span>{t('nav.deleteAll')}</span>
                     </motion.button>
 
                     {/* Logout */}
@@ -300,7 +338,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       className="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-400 hover:bg-muted rounded-xl transition-colors text-left"
                     >
                       <LogOut className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                      <span>Keluar</span>
+                      <span>{t('nav.logout')}</span>
                     </motion.button>
                   </>
                 )}

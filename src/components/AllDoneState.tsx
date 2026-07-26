@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Trophy, CalendarDays, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Trophy, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/language-context';
 
 interface AllDoneStateProps {
   totalHabits: number;
@@ -8,7 +9,8 @@ interface AllDoneStateProps {
   onViewBadHabits: () => void;
 }
 
-export function AllDoneState({ totalHabits, onViewGoodHabits, onViewBadHabits }: AllDoneStateProps) {
+export function AllDoneState({ totalHabits: _totalHabits, onViewGoodHabits, onViewBadHabits }: AllDoneStateProps) {
+  const { t } = useLanguage();
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
@@ -24,8 +26,8 @@ export function AllDoneState({ totalHabits, onViewGoodHabits, onViewBadHabits }:
         className="mb-6"
       >
         <div className="relative">
-          <div className="w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center">
-            <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+          <div className="w-24 h-24 rounded-full bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center">
+            <CheckCircle2 className="w-12 h-12 text-emerald-600 dark:text-emerald-400" />
           </div>
           {/* Floating particles */}
           <motion.div
@@ -59,7 +61,7 @@ export function AllDoneState({ totalHabits, onViewGoodHabits, onViewBadHabits }:
         transition={{ delay: 0.3 }}
         className="text-2xl font-bold mb-2 text-foreground"
       >
-        Hari Ini Luar Biasa!
+        {t('allDone.title')}
       </motion.h3>
       
       {/* Description */}
@@ -69,11 +71,7 @@ export function AllDoneState({ totalHabits, onViewGoodHabits, onViewBadHabits }:
         transition={{ delay: 0.4 }}
         className="text-muted-foreground mb-6 max-w-sm mx-auto"
       >
-        Kamu sudah menyelesaikan{' '}
-        <span className="font-semibold text-emerald-600">
-          {totalHabits} kebiasaan
-        </span>
-        {' '}hari ini. Pertahankan momentum positifmu!
+        {t('allDone.subtitle')}
       </motion.p>
 
       {/* Stats summary */}
@@ -81,10 +79,12 @@ export function AllDoneState({ totalHabits, onViewGoodHabits, onViewBadHabits }:
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="flex items-center gap-2 mb-8 px-4 py-2 bg-emerald-50 rounded-full"
+        className="flex items-center gap-2 mb-8 px-4 py-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-full"
       >
-        <Trophy className="w-4 h-4 text-emerald-600" />
-        <span className="text-sm text-emerald-700">Streak bertambah! Terus konsisten.</span>
+        <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        <span className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+          {t('allDone.quote')}
+        </span>
       </motion.div>
 
       {/* Navigation CTAs */}
@@ -94,17 +94,12 @@ export function AllDoneState({ totalHabits, onViewGoodHabits, onViewBadHabits }:
         transition={{ delay: 0.6 }}
         className="flex flex-col gap-3 w-full max-w-xs"
       >
-        <p className="text-sm text-muted-foreground mb-1">
-          <CalendarDays className="w-4 h-4 inline mr-1" />
-          Review progress hari ini:
-        </p>
-        
         <Button
           variant="outline"
           onClick={onViewGoodHabits}
           className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full border border-emerald-500/20 bg-emerald-50/60 px-4 py-2 text-xs font-semibold text-emerald-700 transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10 active:scale-[0.97] dark:bg-emerald-950/20 dark:text-emerald-400 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/15"
         >
-          <span className="relative z-[1] whitespace-nowrap">Lihat Kebiasaan Baik</span>
+          <span className="relative z-[1] whitespace-nowrap">{t('tabs.good')}</span>
           <ArrowRight className="h-3.5 w-3.5 shrink-0 text-emerald-600 transition-transform duration-300 group-hover:translate-x-0.5 dark:text-emerald-400" />
         </Button>
 
@@ -113,7 +108,7 @@ export function AllDoneState({ totalHabits, onViewGoodHabits, onViewBadHabits }:
           onClick={onViewBadHabits}
           className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full border border-rose-500/20 bg-rose-50/60 px-4 py-2 text-xs font-semibold text-rose-700 transition-all duration-300 hover:border-rose-500/40 hover:bg-rose-500/10 active:scale-[0.97] dark:bg-rose-950/20 dark:text-rose-400 dark:hover:border-rose-500/40 dark:hover:bg-rose-500/15"
         >
-          <span className="relative z-[1] whitespace-nowrap">Lihat Kebiasaan Buruk</span>
+          <span className="relative z-[1] whitespace-nowrap">{t('tabs.bad')}</span>
           <ArrowRight className="h-3.5 w-3.5 shrink-0 text-rose-600 transition-transform duration-300 group-hover:translate-x-0.5 dark:text-rose-400" />
         </Button>
       </motion.div>

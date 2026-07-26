@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense, memo } from 'react';
 import { useHabits } from '@/hooks/useHabits';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/context/language-context';
 import { Navbar1 } from '@/components/ui/navbar-1';
 import { FloatingBottomNav } from '@/components/ui/floating-bottom-nav';
 import { DailyHero } from '@/components/DailyHero';
@@ -52,6 +53,7 @@ const generateDates = (): string[] => {
 const ALL_DATES = generateDates();
 
 function App() {
+  const { t, currentTranslations } = useLanguage();
   const { user, loading: authLoading, isPreviewMode, logout, requestSignIn } = useAuth();
   
   // Load custom avatar from localStorage on mount
@@ -97,6 +99,45 @@ function App() {
   useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
+  
+  // Deteksi streak reset (Brian Tracy concept)
+  useEffect(() => {
+    if (!isLoaded || activeHabits.length === 0) return;
+    
+    try {
+      const notifiedResetsStr = localStorage.getItem('notifiedResets');
+      const notifiedResets = notifiedResetsStr ? JSON.parse(notifiedResetsStr) : {};
+      let updated = false;
+
+      activeHabits.forEach(habit => {
+        const stats = getHabitStats(habit.id);
+        // Jika streak 0 tapi pernah ada history
+        if (stats.currentStreak === 0 && stats.totalCompleted > 0) {
+          const habitLogs = logs.filter(l => l.habitId === habit.id && l.completed);
+          if (habitLogs.length > 0) {
+            habitLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            const lastDate = habitLogs[0].date;
+            
+            // Jika reset ini belum pernah dinotifikasi
+            if (notifiedResets[habit.id] !== lastDate) {
+              toast.error(t('toast.streakReset', { name: habit.name }), {
+                duration: 8000,
+                icon: '⚠️'
+              });
+              notifiedResets[habit.id] = lastDate;
+              updated = true;
+            }
+          }
+        }
+      });
+
+      if (updated) {
+        localStorage.setItem('notifiedResets', JSON.stringify(notifiedResets));
+      }
+    } catch (e) {
+      console.error("Error checking streak resets", e);
+    }
+  }, [isLoaded, activeHabits, logs, getHabitStats, t]);
   
   const [addHabitType, setAddHabitType] = useState<HabitType>('good');
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
@@ -267,31 +308,22 @@ function App() {
     });
   };
 
-  const handleAddFromTemplate = (templateName: string) => {
-    const templates: Record<string, { habits: string[]; type: HabitType }> = {
-      'Morning Routine': {
-        habits: ['Minum 2 gelas air', 'Meditasi 5 menit', 'Stretching ringan'],
-        type: 'good' as HabitType,
-      },
-      'Fitness': {
-        habits: ['Jogging 30 menit', '50 Push-up', 'Minum protein shake'],
-        type: 'good' as HabitType,
-      },
-      'Reading': {
-        habits: ['Baca 10 halaman', 'Catat quotes favorit', 'Review apa yang dibaca'],
-        type: 'good' as HabitType,
-      },
-    };
+  const handleAddFromTemplate = (templateKey: string) => {
+    const templatesMap = currentTranslations.templates;
+    const templateData = templatesMap[templateKey as keyof typeof templatesMap];
 
-    const template = templates[templateName];
-    if (template) {
-      template.habits.forEach((habitName, index) => {
+    if (templateData && typeof templateData === 'object' && 'habits' in templateData) {
+      const habitsList = (templateData as { name: string; habits: string[] }).habits;
+      const templateName = (templateData as { name: string; habits: string[] }).name;
+      habitsList.forEach((habitName, index) => {
         setTimeout(() => {
-          addHabit(habitName, template.type);
+          addHabit(habitName, 'good');
         }, index * 200);
       });
-      toast.success(`Template ${templateName} ditambahkan!`, {
-        description: `${template.habits.length} kebiasaan telah ditambahkan.`,
+      const titleMsg = templatesMap.templateAdded.replace('{name}', templateName);
+      const descMsg = templatesMap.habitsAddedCount.replace('{count}', String(habitsList.length));
+      toast.success(titleMsg, {
+        description: descMsg,
       });
     }
   };
@@ -537,9 +569,9 @@ function App() {
         {activeTab !== 'stats' && (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="today">Hari Ini</TabsTrigger>
-              <TabsTrigger value="good">Kebiasaan Baik</TabsTrigger>
-              <TabsTrigger value="bad">Kebiasaan Buruk</TabsTrigger>
+              <TabsTrigger value="today">{t('tabs.today')}</TabsTrigger>
+              <TabsTrigger value="good">{t('stats.goodHabits')}</TabsTrigger>
+              <TabsTrigger value="bad">{t('stats.badHabits')}</TabsTrigger>
             </TabsList>
 
             {/* Today Tab */}
@@ -570,7 +602,7 @@ function App() {
                   <div className="space-y-2">
                     <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
                       <GoodHabitIcon className="h-4 w-4 text-emerald-500" />
-                      Kebiasaan Baik
+                      {t('stats.goodHabits')}
                     </h3>
                     <div className="space-y-2">
                       {goodHabitsToday.map(habit => (
@@ -600,7 +632,7 @@ function App() {
                   <div className="space-y-2">
                     <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
                       <BadHabitIcon className="h-4 w-4 text-rose-500" />
-                      Kebiasaan Buruk
+                      {t('stats.badHabits')}
                     </h3>
                     <div className="space-y-2">
                       {badHabitsToday.map(habit => (
@@ -635,21 +667,21 @@ function App() {
               <Card className="p-2.5 bg-emerald-50/50 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/50 w-fit max-w-[90vw] sm:max-w-md">
                 <p className="text-[11px] sm:text-xs text-emerald-800 dark:text-emerald-400 text-center sm:text-left leading-relaxed">
                   <GoodHabitIcon className="h-3.5 w-3.5 inline mr-1 -translate-y-[1px]" />
-                  Kebiasaan baik membantumu tumbuh dan berkembang. Tetap konsisten!
+                  {t('emptyState.goodBanner')}
                 </p>
               </Card>
             </div>
 
             {goodHabitsAll.length === 0 ? (
               <Card className="p-8 text-center flex flex-col items-center border-dashed">
-                <p className="text-muted-foreground text-sm">Belum ada kebiasaan baik</p>
+                <p className="text-muted-foreground text-sm">{t('emptyState.noGoodHabits')}</p>
                 <div className="mt-4 flex items-center gap-3 text-left max-w-xs p-3 rounded-xl bg-muted/40 border border-border/40">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                     <GoodHabitIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-foreground">Klik tombol + di navbar bawah</p>
-                    <p className="text-[10px] text-muted-foreground">untuk membuat kebiasaan baik baru.</p>
+                    <p className="text-xs font-semibold text-foreground">{t('emptyState.clickPlusHint')}</p>
+                    <p className="text-[10px] text-muted-foreground">{t('emptyState.toCreateGood')}</p>
                   </div>
                 </div>
               </Card>
@@ -681,21 +713,21 @@ function App() {
               <Card className="p-2.5 bg-rose-50/50 border-rose-100 dark:bg-rose-950/30 dark:border-rose-900/50 w-fit max-w-[90vw] sm:max-w-md">
                 <p className="text-[11px] sm:text-xs text-rose-800 dark:text-rose-400 text-center sm:text-left leading-relaxed">
                   <BadHabitIcon className="h-3.5 w-3.5 inline mr-1 -translate-y-[1px]" />
-                  Lacak kebiasaan buruk untuk menyadari pola dan menguranginya.
+                  {t('emptyState.badBanner')}
                 </p>
               </Card>
             </div>
 
             {badHabitsAll.length === 0 ? (
               <Card className="p-8 text-center flex flex-col items-center border-dashed">
-                <p className="text-muted-foreground text-sm">Belum ada kebiasaan buruk</p>
+                <p className="text-muted-foreground text-sm">{t('emptyState.noBadHabits')}</p>
                 <div className="mt-4 flex items-center gap-3 text-left max-w-xs p-3 rounded-xl bg-muted/40 border border-border/40">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400">
                     <BadHabitIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-foreground">Klik tombol + di navbar bawah</p>
-                    <p className="text-[10px] text-muted-foreground">untuk membuat kebiasaan buruk baru.</p>
+                    <p className="text-xs font-semibold text-foreground">{t('emptyState.clickPlusHint')}</p>
+                    <p className="text-[10px] text-muted-foreground">{t('emptyState.toCreateBad')}</p>
                   </div>
                 </div>
               </Card>
@@ -731,7 +763,7 @@ function App() {
             </Suspense>
 
             <Card className="p-5 relative">
-              <h2 className="text-sm font-medium mb-4">Grafik Aktivitas</h2>
+              <h2 className="text-sm font-medium mb-4">{t('stats.activityChart')}</h2>
               <Suspense fallback={<ShimmerSkeleton height="150px" borderRadius="6px" />}>
                 <GitHubCalendar 
                   key={calendarKey} 
@@ -743,20 +775,20 @@ function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="p-4">
-                <h3 className="text-sm font-medium mb-3">Ringkasan Performa</h3>
+                <h3 className="text-sm font-medium mb-3">{t('stats.performanceSummary')}</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Total Habit</span>
+                    <span className="text-muted-foreground">{t('stats.totalHabits')}</span>
                     <span className="font-semibold">{activeHabits.length}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Habit Baik</span>
+                    <span className="text-muted-foreground">{t('stats.goodHabits')}</span>
                     <span className="font-semibold text-emerald-600">
                       {activeHabits.filter(h => h.type === 'good').length}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Habit Buruk</span>
+                    <span className="text-muted-foreground">{t('stats.badHabits')}</span>
                     <span className="font-semibold text-rose-600">
                       {activeHabits.filter(h => h.type === 'bad').length}
                     </span>

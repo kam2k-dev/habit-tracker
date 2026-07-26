@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload, X, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/language-context";
 
 // Preset avatar options from local provided images
 const PRESET_AVATARS = [
@@ -41,6 +42,7 @@ interface ProfileDialogProps {
 }
 
 export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: ProfileDialogProps) {
+  const { t } = useLanguage();
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(user?.photoURL || null);
   const [_uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -179,7 +181,7 @@ export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: Profile
       <DialogContent className="sm:max-w-md max-w-[92vw] rounded-2xl p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-lg font-semibold">
-            Profil Akun
+            {t('profile.title')}
           </DialogTitle>
         </DialogHeader>
 

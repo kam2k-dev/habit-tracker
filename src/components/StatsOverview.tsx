@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Flame } from 'lucide-react';
 import { Odometer } from '@/components/ui/odometer';
 import type { Habit, HabitStats, HabitLog } from '@/types/habit';
+import { useLanguage } from '@/context/language-context';
 
 interface StatsOverviewProps {
   habits: Habit[];
@@ -18,6 +19,7 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProps) {
+  const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isStreakDialogOpen, setIsStreakDialogOpen] = useState(false);
 
@@ -72,7 +74,6 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
     };
   }, [habits, getHabitStats]);
 
-  // Calculate detailed habit trends
   const habitDetails = useMemo(() => {
     const today = new Date();
     const thirtyDaysAgo = new Date(today);
@@ -84,7 +85,6 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
     const goodHabits = habits.filter(h => h.type === 'good');
     const badHabits = habits.filter(h => h.type === 'bad');
 
-    // Calculate trend for each habit by comparing first 15 days vs last 15 days
     const calculateTrend = (habitId: string) => {
       const habitLogs = logs.filter(l => l.habitId === habitId && new Date(l.date) >= thirtyDaysAgo);
 
@@ -98,86 +98,83 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
         ? secondHalfLogs.filter(l => l.completed).length / 15 * 100
         : 0;
 
-      const change = secondHalfRate - firstHalfRate;
-
       return {
         firstHalfRate: Math.round(firstHalfRate),
         secondHalfRate: Math.round(secondHalfRate),
-        change: Math.round(change),
-        isImproving: change > 5,
-        isDeclining: change < -5,
-        isStable: Math.abs(change) <= 5,
+        diff: Math.round(secondHalfRate - firstHalfRate),
       };
     };
 
-    const goodHabitDetails = goodHabits.map(habit => ({
-      ...habit,
-      trend: calculateTrend(habit.id),
+    const goodWithTrends = goodHabits.map(h => ({
+      ...h,
+      stats: getHabitStats(h.id),
+      trend: calculateTrend(h.id),
     }));
 
-    const badHabitDetails = badHabits.map(habit => ({
-      ...habit,
-      trend: calculateTrend(habit.id),
+    const badWithTrends = badHabits.map(h => ({
+      ...h,
+      stats: getHabitStats(h.id),
+      trend: calculateTrend(h.id),
     }));
 
     return {
-      goodRunning: goodHabitDetails.filter(h => h.trend.isImproving || h.trend.isStable),
-      goodStopped: goodHabitDetails.filter(h => h.trend.isDeclining),
-      badDecreasing: badHabitDetails.filter(h => h.trend.isDeclining), // Less bad habit = improving
-      badIncreasing: badHabitDetails.filter(h => h.trend.isImproving), // More bad habit = worsening
+      goodRunning: goodWithTrends.filter(h => h.trend.secondHalfRate >= 50),
+      goodStopped: goodWithTrends.filter(h => h.trend.secondHalfRate < 50),
+      badAvoided: badWithTrends.filter(h => h.trend.secondHalfRate >= 50),
+      badOccurred: badWithTrends.filter(h => h.trend.secondHalfRate < 50),
     };
-  }, [habits, logs]);
+  }, [habits, logs, getHabitStats]);
 
-  // Calculate streak details for each habit
   const streakDetails = useMemo(() => {
-    const goodHabits = habits.filter(h => h.type === 'good');
-    const badHabits = habits.filter(h => h.type === 'bad');
+    const goodHabits = habits.filter(h => h.type === 'good').map(h => ({
+      ...h,
+      stats: getHabitStats(h.id),
+    })).sort((a, b) => b.stats.currentStreak - a.stats.currentStreak);
 
-    const goodStreakHabits = goodHabits
-      .map(h => ({ ...h, stats: getHabitStats(h.id) }))
-      .filter(h => h.stats.currentStreak > 0)
-      .sort((a, b) => b.stats.currentStreak - a.stats.currentStreak);
-
-    const badStreakHabits = badHabits
-      .map(h => ({ ...h, stats: getHabitStats(h.id) }))
-      .filter(h => h.stats.currentStreak > 0)
-      .sort((a, b) => b.stats.currentStreak - a.stats.currentStreak);
+    const badHabits = habits.filter(h => h.type === 'bad').map(h => ({
+      ...h,
+      stats: getHabitStats(h.id),
+    })).sort((a, b) => b.stats.currentStreak - a.stats.currentStreak);
 
     return {
-      goodStreaks: goodStreakHabits,
-      badStreaks: badStreakHabits,
+      goodStreaks: goodHabits,
+      badStreaks: badHabits,
     };
   }, [habits, getHabitStats]);
 
   const statCards = [
     {
-      title: 'Kebiasaan Baik',
+      id: 'goodHabits',
+      title: t('stats.goodHabits'),
       value: stats.goodHabitsCount,
-      subtitle: 'yang sedang di-track',
+      subtitle: t('stats.totalHabits'),
       icon: TargetIcon,
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
     },
     {
-      title: 'Streak Tertinggi',
+      id: 'activeStreak',
+      title: t('stats.activeStreak'),
       value: stats.maxGoodStreak,
-      subtitle: 'hari berturut-turut',
+      subtitle: t('hero.days'),
       icon: StreakIcon,
       color: 'text-orange-600 dark:text-orange-400',
       bgColor: 'bg-orange-50 dark:bg-orange-950/30',
     },
     {
-      title: 'Rate Penyelesaian',
+      id: 'completionRate',
+      title: t('stats.completionRate'),
       value: `${stats.avgGoodCompletionRate}%`,
-      subtitle: '30 hari terakhir',
+      subtitle: t('stats.weeklyProgress'),
       icon: TrendingIcon,
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-50 dark:bg-blue-950/30',
     },
     {
-      title: 'Total Selesai',
+      id: 'totalCompleted',
+      title: t('stats.bestStreak'),
       value: stats.totalGoodCompleted + stats.totalBadCompleted,
-      subtitle: 'semua kebiasaan',
+      subtitle: t('stats.totalHabits'),
       icon: CalendarCheckIcon,
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-50 dark:bg-purple-950/30',
@@ -190,8 +187,8 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
         {statCards.map((card, index) => (
           <Card
             key={index}
-            className={`p-4 ${card.title === 'Rate Penyelesaian' || card.title === 'Streak Tertinggi' ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}`}
-            onClick={card.title === 'Rate Penyelesaian' ? () => setIsDialogOpen(true) : card.title === 'Streak Tertinggi' ? () => setIsStreakDialogOpen(true) : undefined}
+            className={`p-4 ${card.id === 'completionRate' || card.id === 'activeStreak' ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}`}
+            onClick={card.id === 'completionRate' ? () => setIsDialogOpen(true) : card.id === 'activeStreak' ? () => setIsStreakDialogOpen(true) : undefined}
           >
             <div className="flex items-start justify-between">
               <div>
@@ -203,7 +200,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                     card.value
                   )}
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{card.subtitle}</p>
+                <p className="text-[10px] text-muted-foreground mt-2">{card.subtitle}</p>
               </div>
               <div className={`p-2 rounded-lg ${card.bgColor}`}>
                 <card.icon className={`h-4 w-4 ${card.color}`} />
@@ -223,8 +220,8 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                   <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400 relative z-10" />
                 </div>
                 <div>
-                  <span className="bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Rate Penyelesaian</span>
-                  <p className="text-xs font-normal text-muted-foreground mt-0.5">Ringkasan performa 30 hari terakhir</p>
+                  <span className="bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">{t('stats.completionRate')}</span>
+                  <p className="text-xs font-normal text-muted-foreground mt-0.5">{t('stats.last30DaysSummary')}</p>
                 </div>
               </DialogTitle>
             </DialogHeader>
@@ -241,7 +238,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                     <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{stats.avgGoodCompletionRate}%</span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">Kebiasaan Baik</h4>
+                    <h4 className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">{t('stats.goodHabits')}</h4>
                     <Progress value={stats.avgGoodCompletionRate} className="h-1.5 mt-2 bg-emerald-200/50 dark:bg-emerald-900/50" />
                   </div>
                 </div>
@@ -255,7 +252,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                     <span className="text-2xl font-bold text-rose-700 dark:text-rose-300">{stats.avgBadCompletionRate}%</span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-rose-800 dark:text-rose-200">Kebiasaan Buruk</h4>
+                    <h4 className="text-sm font-semibold text-rose-800 dark:text-rose-200">{t('stats.badHabits')}</h4>
                     <Progress value={stats.avgBadCompletionRate} className="h-1.5 mt-2 bg-rose-200/50 dark:bg-rose-900/50" />
                   </div>
                 </div>
@@ -266,7 +263,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                 {/* Good Habits Running Well */}
                 {habitDetails.goodRunning.length > 0 && (
                   <div className="space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">Trend Positif</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">{t('stats.positiveTrend')}</p>
                     <div className="space-y-2">
                       {habitDetails.goodRunning.map(h => (
                         <div key={h.id} className="group p-3 rounded-xl border border-border/50 bg-muted/20 dark:bg-muted/30 hover:bg-muted/30 transition-all duration-300">
@@ -293,7 +290,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                 {/* Good Habits Stopped */}
                 {habitDetails.goodStopped.length > 0 && (
                   <div className="space-y-3 pt-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">Perlu Perhatian</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">{t('stats.needsAttention')}</p>
                     <div className="space-y-2">
                       {habitDetails.goodStopped.map(h => (
                         <div key={h.id} className="group p-3 rounded-xl border border-border/50 bg-muted/20 dark:bg-muted/30 hover:bg-muted/30 transition-all duration-300">
@@ -321,7 +318,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
               {/* Summary Footer */}
               <div className="mt-6 p-4 rounded-xl bg-muted/20 dark:bg-muted/30 border border-border/50">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">Rata-rata Keseluruhan</span>
+                  <span className="text-muted-foreground font-medium">{t('stats.overallAverage')}</span>
                   <span className="font-bold text-xl text-foreground">
                     {Math.round((stats.avgGoodCompletionRate + stats.avgBadCompletionRate) / 2)}%
                   </span>
@@ -342,8 +339,8 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                   <Flame className="h-6 w-6 text-orange-600 dark:text-orange-400 relative z-10" />
                 </div>
                 <div>
-                  <span className="bg-gradient-to-br from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 bg-clip-text text-transparent">Detail Streak</span>
-                  <p className="text-xs font-normal text-muted-foreground mt-0.5">Rekor konsistensi kebiasaanmu</p>
+                  <span className="bg-gradient-to-br from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 bg-clip-text text-transparent">{t('stats.streakDetails')}</span>
+                  <p className="text-xs font-normal text-muted-foreground mt-0.5">{t('stats.streakRecordDesc')}</p>
                 </div>
               </DialogTitle>
             </DialogHeader>
@@ -352,9 +349,9 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
               {/* Streak Bento Header */}
               <div className="p-4 rounded-xl border border-border/50 bg-card flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-orange-800/70 dark:text-orange-200/70">Streak Tertinggi</p>
+                  <p className="text-sm font-medium text-orange-800/70 dark:text-orange-200/70">{t('stats.highestStreak')}</p>
                   <div className="text-3xl font-black text-orange-600 dark:text-orange-400 mt-1 flex items-baseline gap-1">
-                    {Math.max(stats.maxGoodStreak, streakDetails.badStreaks[0]?.stats.currentStreak || 0)} <span className="text-base font-medium text-orange-600/60 dark:text-orange-400/60">hari</span>
+                    {Math.max(stats.maxGoodStreak, streakDetails.badStreaks[0]?.stats.currentStreak || 0)} <span className="text-base font-medium text-orange-600/60 dark:text-orange-400/60">{t('hero.days')}</span>
                   </div>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-muted/20 dark:bg-muted/30 flex items-center justify-center">
@@ -366,7 +363,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 px-1">
                   <TargetIcon className="h-4 w-4" />
-                  Kebiasaan Baik
+                  {t('stats.goodHabits')}
                 </div>
                 {streakDetails.goodStreaks.length > 0 ? (
                   <div className="space-y-2">
@@ -379,7 +376,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                           <span className="text-sm font-medium text-foreground z-10">{h.name}</span>
                           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-orange-400/10 to-red-400/10 text-orange-600 dark:text-orange-400 text-xs font-bold z-10 border border-orange-200/20 dark:border-orange-800/30">
                             <Flame className="h-3 w-3" />
-                            {h.stats.currentStreak} hari
+                            {h.stats.currentStreak} {t('hero.days')}
                           </div>
                         </div>
                         <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
@@ -395,7 +392,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                   </div>
                 ) : (
                   <div className="p-4 text-center rounded-xl border border-dashed border-border/50 bg-background/20">
-                    <p className="text-xs text-muted-foreground">Belum ada streak aktif</p>
+                    <p className="text-xs text-muted-foreground">{t('stats.noActiveStreak')}</p>
                   </div>
                 )}
               </div>
@@ -404,7 +401,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-rose-600 dark:text-rose-400 px-1">
                   <TrendingUp className="h-4 w-4" />
-                  Kebiasaan Buruk
+                  {t('stats.badHabits')}
                 </div>
                 {streakDetails.badStreaks.length > 0 ? (
                   <div className="space-y-2">
@@ -417,7 +414,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                           <span className="text-sm font-medium text-foreground z-10">{h.name}</span>
                           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-orange-400/10 to-red-400/10 text-orange-600 dark:text-orange-400 text-xs font-bold z-10 border border-orange-200/20 dark:border-orange-800/30">
                             <Flame className="h-3 w-3" />
-                            {h.stats.currentStreak} hari
+                            {h.stats.currentStreak} {t('hero.days')}
                           </div>
                         </div>
                         <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
@@ -433,7 +430,7 @@ export function StatsOverview({ habits, getHabitStats, logs }: StatsOverviewProp
                   </div>
                 ) : (
                   <div className="p-4 text-center rounded-xl border border-dashed border-border/50 bg-background/20">
-                    <p className="text-xs text-muted-foreground">Belum ada streak aktif</p>
+                    <p className="text-xs text-muted-foreground">{t('stats.noActiveStreak')}</p>
                   </div>
                 )}
               </div>

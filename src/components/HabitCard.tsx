@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { motion, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
 import { useConfetti } from '@/hooks/useConfetti';
 import { useCountUp } from '@/hooks/useCountUp';
+import { useLanguage } from '@/context/language-context';
 
 interface HabitCardProps {
   habit: Habit;
@@ -60,6 +61,7 @@ export function HabitCard({
   hideAfterComplete = false,
   recentLogs = []
 }: HabitCardProps) {
+  const { t } = useLanguage();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editName, setEditName] = useState(habit.name);
@@ -435,11 +437,11 @@ export function HabitCard({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
                   <Edit2 className="h-4 w-4 mr-2" />
-                  Edit
+                  {t('habitCard.editHabit')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus
+                  {t('habitCard.deleteHabit')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -492,19 +494,19 @@ export function HabitCard({
 
                   <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-3">
                     <div className="space-y-0.5">
-                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Current Streak</p>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t('hero.activeStreak')}</p>
                       <p className="text-sm font-semibold flex items-center gap-1">
                         <StreakIcon className="h-3.5 w-3.5 text-orange-500" />
-                        {animatedStreak} hari
+                        {animatedStreak} {t('hero.days')}
                       </p>
                     </div>
                     <div className="space-y-0.5">
-                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Best Streak</p>
-                      <p className="text-sm font-semibold">{stats.longestStreak} hari</p>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t('stats.activeStreak')}</p>
+                      <p className="text-sm font-semibold">{stats.longestStreak} {t('hero.days')}</p>
                     </div>
                     <div className="space-y-0.5">
-                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Total Selesai</p>
-                      <p className="text-sm font-semibold">{animatedTotal} kali</p>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t('habitCard.totalDone')}</p>
+                      <p className="text-sm font-semibold">{animatedTotal} {t('habitCard.times')}</p>
                     </div>
                     <div className="space-y-0.5">
                       <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Status</p>
@@ -528,7 +530,7 @@ export function HabitCard({
                     className="h-auto p-0 text-[10px] text-muted-foreground hover:text-primary flex items-center gap-1"
                     onClick={() => setIsDetailPopupOpen(true)}
                   >
-                    Buka Riwayat Lengkap <ChevronRight className="h-3 w-3" />
+                    {t('dayDetail.title')} <ChevronRight className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -543,27 +545,27 @@ export function HabitCard({
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Kebiasaan</DialogTitle>
+            <DialogTitle>{t('addHabit.editTitle')}</DialogTitle>
             <DialogDescription>
-              Ubah nama kebiasaanmu di sini.
+              {t('addHabit.habitNameLabel')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nama Kebiasaan</Label>
+              <Label htmlFor="name">{t('addHabit.habitNameLabel')}</Label>
               <Input
                 id="name"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                placeholder="Masukkan nama kebiasaan"
+                placeholder={t('addHabit.habitNamePlaceholder')}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Batal
+              {t('habitCard.cancel')}
             </Button>
-            <Button onClick={handleSaveEdit}>Simpan</Button>
+            <Button onClick={handleSaveEdit}>{t('habitCard.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -572,18 +574,17 @@ export function HabitCard({
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Hapus Kebiasaan</DialogTitle>
+            <DialogTitle>{t('habitCard.confirmDelete')}</DialogTitle>
             <DialogDescription>
-              Apakah kamu yakin ingin menghapus kebiasaan &quot;{habit.name}&quot;? 
-              Semua data riwayat juga akan dihapus.
+              {t('habitCard.confirmDeleteDesc')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Batal
+              {t('habitCard.cancel')}
             </Button>
             <Button variant="destructive" onClick={onDelete}>
-              Hapus
+              {t('habitCard.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -597,30 +598,30 @@ export function HabitCard({
               {habit.name}
             </DialogTitle>
             <DialogDescription className="text-xs">
-              {isGood ? 'Kebiasaan Baik' : 'Kebiasaan Buruk'} • {isCompleted ? 'Selesai' : 'Belum Selesai'}
+              {isGood ? t('addHabit.goodType') : t('addHabit.badType')} • {isCompleted ? t('habitCard.done') : t('habitCard.undone')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Total Selesai</span>
+              <span className="text-muted-foreground">{t('habitCard.totalDone')}</span>
               <span className="font-medium">{stats.totalCompleted}x</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Streak Saat Ini</span>
-              <span className="font-medium text-orange-500">{stats.currentStreak} hari</span>
+              <span className="text-muted-foreground">{t('hero.activeStreak')}</span>
+              <span className="font-medium text-orange-500">{stats.currentStreak} {t('hero.days')}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Tingkat Penyelesaian</span>
+              <span className="text-muted-foreground">{t('stats.completionRate')}</span>
               <span className="font-medium">{stats.completionRate}%</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Streak Terpanjang</span>
-              <span className="font-medium">{stats.longestStreak} hari</span>
+              <span className="text-muted-foreground">{t('stats.activeStreak')}</span>
+              <span className="font-medium">{stats.longestStreak} {t('hero.days')}</span>
             </div>
           </div>
           <DialogFooter>
             <Button onClick={() => setIsDetailPopupOpen(false)} className="w-full">
-              Tutup
+              {t('dayDetail.close')}
             </Button>
           </DialogFooter>
         </DialogContent>

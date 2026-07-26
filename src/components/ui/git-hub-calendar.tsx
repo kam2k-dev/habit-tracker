@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { format, subDays, addDays, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
+import { useLanguage } from "@/context/language-context";
 
 interface ContributionDay {
   date: string;
@@ -87,6 +88,7 @@ const blendColors = (good: number, bad: number, isDark: boolean): string => {
 };
 
 const GitHubCalendar = ({ data, onDayClick }: GitHubCalendarProps) => {
+  const { language, t } = useLanguage();
   const today = new Date();
   const startDate = subDays(today, 364);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -139,6 +141,18 @@ const GitHubCalendar = ({ data, onDayClick }: GitHubCalendarProps) => {
     return blendColors(good, bad, isDark);
   };
 
+  const monthNames = language === 'id'
+    ? ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+    : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  const dayNames = language === 'id'
+    ? ['Sen','Sel','Rab','Kam','Jum','Sab','Min']
+    : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  const goodText = t('stats.good');
+  const badText = t('stats.bad');
+  const emptyText = t('stats.empty');
+
   // Generate weeks - use 53 weeks to ensure today is covered (365 days can span 53 weeks)
   const weeks: React.ReactElement[] = [];
   let weekStart = startOfWeek(startDate, { weekStartsOn: 1 });
@@ -164,7 +178,7 @@ const GitHubCalendar = ({ data, onDayClick }: GitHubCalendarProps) => {
             isFuture ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:ring-2 hover:ring-primary/50'
           }`}
           style={{ backgroundColor: bg }}
-          title={`${dayStr}: ${val.good > 0 ? val.good + ' baik' : ''}${val.good > 0 && val.bad > 0 ? ', ' : ''}${val.bad > 0 ? val.bad + ' buruk' : ''}${val.good === 0 && val.bad === 0 ? 'kosong' : ''}`}
+          title={`${dayStr}: ${val.good > 0 ? `${val.good} ${goodText}` : ''}${val.good > 0 && val.bad > 0 ? ', ' : ''}${val.bad > 0 ? `${val.bad} ${badText}` : ''}${val.good === 0 && val.bad === 0 ? emptyText : ''}`}
         />
       );
     });
@@ -179,7 +193,7 @@ const GitHubCalendar = ({ data, onDayClick }: GitHubCalendarProps) => {
     const mDate = addDays(startDate, m * 30);
     months.push(
       <span key={m} className="text-[10px] text-muted-foreground" style={{ width: '8.33%', textAlign: 'center' }}>
-        {['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][mDate.getMonth()]}
+        {monthNames[mDate.getMonth()]}
       </span>
     );
   }
@@ -214,13 +228,9 @@ const GitHubCalendar = ({ data, onDayClick }: GitHubCalendarProps) => {
             {/* Day labels - all 7 days, aligned with grid (12px + 4px gap = 16px per row) */}
             <div className="flex flex-col w-8 shrink-0 pr-2" style={{ height: '108px' }}>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-muted-foreground h-3 leading-[12px]">Sen</span>
-                <span className="text-[10px] text-muted-foreground h-3 leading-[12px]">Sel</span>
-                <span className="text-[10px] text-muted-foreground h-3 leading-[12px]">Rab</span>
-                <span className="text-[10px] text-muted-foreground h-3 leading-[12px]">Kam</span>
-                <span className="text-[10px] text-muted-foreground h-3 leading-[12px]">Jum</span>
-                <span className="text-[10px] text-muted-foreground h-3 leading-[12px]">Sab</span>
-                <span className="text-[10px] text-muted-foreground h-3 leading-[12px]">Min</span>
+                {dayNames.map((dayLabel, idx) => (
+                  <span key={idx} className="text-[10px] text-muted-foreground h-3 leading-[12px]">{dayLabel}</span>
+                ))}
               </div>
             </div>
             

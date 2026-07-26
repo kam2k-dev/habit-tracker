@@ -5,6 +5,7 @@ import { HomeIcon } from '@/components/icons/HomeIcon';
 import { GoodHabitIcon } from '@/components/icons/GoodHabitIcon';
 import { BadHabitIcon } from '@/components/icons/BadHabitIcon';
 import { TrendingIcon } from '@/components/icons/TrendingIcon';
+import { useLanguage } from '@/context/language-context';
 
 export interface NavItem {
   id: string;
@@ -27,12 +28,13 @@ export function FloatingBottomNav({
   onAddClick,
   className,
 }: FloatingBottomNavProps) {
+  const { t } = useLanguage();
   const items: NavItem[] = [
-    { id: 'today', label: 'Hari Ini', icon: HomeIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-blue-500 dark:text-blue-500' },
-    { id: 'good', label: 'Baik', icon: GoodHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-emerald-500 dark:text-emerald-400' },
+    { id: 'today', label: t('tabs.today'), icon: HomeIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-blue-500 dark:text-blue-500' },
+    { id: 'good', label: t('tabs.good'), icon: GoodHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-emerald-500 dark:text-emerald-400' },
     { id: 'add', label: '', icon: Plus },
-    { id: 'bad', label: 'Buruk', icon: BadHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-rose-500 dark:text-rose-400' },
-    { id: 'stats', label: 'Stats', icon: TrendingIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-purple-500 dark:text-purple-400' },
+    { id: 'bad', label: t('tabs.bad'), icon: BadHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-rose-500 dark:text-rose-400' },
+    { id: 'stats', label: t('tabs.stats'), icon: TrendingIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-purple-500 dark:text-purple-400' },
   ];
 
   return (
@@ -74,9 +76,9 @@ export function FloatingBottomNav({
                 className="relative z-10 flex flex-col items-center justify-center rounded-full w-[20%]"
               >
                 <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.92 }}
-                  transition={{ type: 'spring', stiffness: 340, damping: 22 }}
+                  whileHover={{ scale: 1.15, rotate: 90 }}
+                  whileTap={{ scale: 0.88, rotate: 180 }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 20 }}
                   className={cn(
                     'relative flex items-center justify-center rounded-full border border-white/40 bg-white/30 backdrop-blur-xl h-12 w-12',
                     'shadow-[0_8px_24px_rgba(15,23,42,0.12),inset_0_1px_1px_rgba(255,255,255,0.65)]',
@@ -98,22 +100,23 @@ export function FloatingBottomNav({
               aria-current={isActive ? 'page' : undefined}
               className="relative z-10 flex flex-col items-center justify-center w-[20%] h-12 overflow-visible"
             >
-              {/* iOS Liquid Sliding Pill Indicator */}
+              {/* iOS Liquid Glass Sliding Pill Indicator (Matched Curvature & Pure Horizontal Slide) */}
               {isActive && (
                 <motion.div
                   layoutId="activeTabPill"
+                  layout="position"
                   className={cn(
-                    "absolute rounded-2xl -z-10 h-10 w-10 sm:w-14",
-                    item.id === 'today' && "bg-blue-500/15 dark:bg-blue-500/25 shadow-[0_2px_12px_rgba(59,130,246,0.2)]",
-                    item.id === 'good' && "bg-emerald-500/15 dark:bg-emerald-500/25 shadow-[0_2px_12px_rgba(16,185,129,0.2)]",
-                    item.id === 'bad' && "bg-rose-500/15 dark:bg-rose-500/25 shadow-[0_2px_12px_rgba(244,63,94,0.2)]",
-                    item.id === 'stats' && "bg-purple-500/15 dark:bg-purple-500/25 shadow-[0_2px_12px_rgba(168,85,247,0.2)]"
+                    "absolute rounded-[24px] -z-10 h-12 w-[90%] max-w-[80px] sm:max-w-[96px] backdrop-blur-xl border border-transparent",
+                    item.id === 'today' && "bg-blue-500/25 dark:bg-blue-500/35 shadow-[0_6px_26px_rgba(59,130,246,0.4)] dark:shadow-[0_6px_26px_rgba(59,130,246,0.5)]",
+                    item.id === 'good' && "bg-emerald-500/25 dark:bg-emerald-500/35 shadow-[0_6px_26px_rgba(16,185,129,0.4)] dark:shadow-[0_6px_26px_rgba(16,185,129,0.5)]",
+                    item.id === 'bad' && "bg-rose-500/25 dark:bg-rose-500/35 shadow-[0_6px_26px_rgba(244,63,94,0.4)] dark:shadow-[0_6px_26px_rgba(244,63,94,0.5)]",
+                    item.id === 'stats' && "bg-purple-500/25 dark:bg-purple-500/35 shadow-[0_6px_26px_rgba(168,85,247,0.4)] dark:shadow-[0_6px_26px_rgba(168,85,247,0.5)]"
                   )}
                   transition={{
                     type: 'spring',
-                    stiffness: 380,
-                    damping: 28,
-                    mass: 0.8
+                    stiffness: 420,
+                    damping: 32,
+                    mass: 0.7
                   }}
                 />
               )}

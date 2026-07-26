@@ -12,8 +12,10 @@ import {
   UserCircle, 
   Sun, 
   LogOut,
-  Moon
+  Moon,
+  Globe
 } from "lucide-react";
+import { useLanguage } from "@/context/language-context";
 
 interface UserDropdownProps {
   user?: {
@@ -46,6 +48,7 @@ export function UserDropdown({
   onProfileClick,
   theme = 'light'
 }: UserDropdownProps) {
+  const { t, language, setLanguage } = useLanguage();
   const displayName = user.name || user.email?.split('@')[0] || "User";
   const initials = user.initials || displayName.slice(0, 2).toUpperCase();
   const username = user.username || user.email || "";
@@ -99,7 +102,21 @@ export function UserDropdown({
             >
               <span className="flex items-center gap-2 font-medium text-gray-600 dark:text-gray-400 text-sm">
                 <UserCircle className="size-4 text-gray-500 dark:text-gray-400" />
-                Profil
+                {t('nav.profile')}
+              </span>
+            </DropdownMenuItem>
+
+            {/* Language Switch Item */}
+            <DropdownMenuItem 
+              className="cursor-pointer p-2.5 rounded-lg hover:bg-accent flex justify-between items-center"
+              onClick={() => setLanguage(language === 'id' ? 'en' : 'id')}
+            >
+              <span className="flex items-center gap-2 font-medium text-gray-600 dark:text-gray-400 text-sm">
+                <Globe className="size-4 text-gray-500 dark:text-gray-400" />
+                {t('nav.language')}
+              </span>
+              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-muted text-foreground uppercase">
+                {language === 'id' ? 'ID' : 'EN'}
               </span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -117,7 +134,7 @@ export function UserDropdown({
                   ) : (
                     <Sun className="size-4 text-gray-500 dark:text-gray-400" />
                   )}
-                  Mode {theme === 'light' ? 'Gelap' : 'Terang'}
+                  {theme === 'light' ? t('nav.darkMode') : t('nav.lightMode')}
                 </span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -136,7 +153,7 @@ export function UserDropdown({
                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
                     <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                   </svg>
-                  Hapus Semua Kebiasaan
+                  {t('nav.deleteAll')}
                 </span>
               </DropdownMenuItem>
             )}
@@ -148,7 +165,7 @@ export function UserDropdown({
               >
                 <span className="flex items-center gap-2 font-medium text-gray-600 dark:text-gray-400 text-sm">
                   <LogOut className="size-4 text-gray-500 dark:text-gray-400" />
-                  Keluar
+                  {t('nav.logout')}
                 </span>
               </DropdownMenuItem>
             )}

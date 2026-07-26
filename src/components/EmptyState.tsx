@@ -2,17 +2,12 @@
 import { motion } from 'framer-motion';
 import { Sunrise, Dumbbell, BookOpen, Plus } from 'lucide-react';
 import { FlowButton } from '@/components/ui/flow-button';
+import { useLanguage } from '@/context/language-context';
 
 interface EmptyStateProps {
   onAddHabit: () => void;
   onAddFromTemplate?: (template: string) => void;
 }
-
-const templates = [
-  { name: 'Morning Routine', icon: Sunrise, habits: ['Minum air putih', 'Meditasi 5 menit', 'Stretching'] },
-  { name: 'Fitness', icon: Dumbbell, habits: ['Jogging 30 menit', 'Push-up', 'Minum protein'] },
-  { name: 'Reading', icon: BookOpen, habits: ['Baca 10 halaman', 'Catat quotes', 'Review buku'] },
-];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -49,6 +44,14 @@ const floatAnimation = {
 };
 
 export function EmptyState({ onAddHabit: _onAddHabit, onAddFromTemplate }: EmptyStateProps) {
+  const { t } = useLanguage();
+
+  const templates = [
+    { key: 'morningRoutine', name: t('templates.morningRoutine.name'), icon: Sunrise },
+    { key: 'fitness', name: t('templates.fitness.name'), icon: Dumbbell },
+    { key: 'reading', name: t('templates.reading.name'), icon: BookOpen },
+  ];
+
   return (
     <motion.div 
       className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center"
@@ -134,7 +137,7 @@ export function EmptyState({ onAddHabit: _onAddHabit, onAddFromTemplate }: Empty
         className="text-xl font-semibold mb-2"
         variants={itemVariants}
       >
-        Mulai Perjalananmu
+        {t('emptyState.title')}
       </motion.h3>
       
       {/* Description */}
@@ -142,7 +145,7 @@ export function EmptyState({ onAddHabit: _onAddHabit, onAddFromTemplate }: Empty
         className="text-muted-foreground mb-8 max-w-sm mx-auto"
         variants={itemVariants}
       >
-        Bangun kebiasaan baik dan kurangi yang buruk. Satu langkah kecil hari ini adalah perubahan besar untuk masa depan.
+        {t('emptyState.description')}
       </motion.p>
 
       {/* Hint to use bottom nav plus button */}
@@ -156,8 +159,8 @@ export function EmptyState({ onAddHabit: _onAddHabit, onAddFromTemplate }: Empty
               <Plus className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">Tambah kebiasaan dari menu + di bawah</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Gunakan navbar bawah untuk menambah kebiasaan baru kapan saja.</p>
+              <p className="text-sm font-semibold text-foreground">{t('emptyState.actionButton')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('emptyState.description')}</p>
             </div>
           </div>
         </div>
@@ -168,11 +171,10 @@ export function EmptyState({ onAddHabit: _onAddHabit, onAddFromTemplate }: Empty
         className="space-y-4"
         variants={itemVariants}
       >
-        <p className="text-sm text-muted-foreground">Atau mulai dengan template:</p>
         <div className="flex flex-wrap justify-center gap-3">
           {templates.map((template, index) => (
             <motion.div
-              key={template.name}
+              key={template.key}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 + index * 0.1, type: 'spring' }}
@@ -181,7 +183,7 @@ export function EmptyState({ onAddHabit: _onAddHabit, onAddFromTemplate }: Empty
             >
               <FlowButton
                 text={template.name}
-                onClick={() => onAddFromTemplate?.(template.name)}
+                onClick={() => onAddFromTemplate?.(template.key)}
                 variant="good"
                 icon="arrow"
               />

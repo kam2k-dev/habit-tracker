@@ -6,10 +6,13 @@ import { Input } from '@/components/ui/input';
 import { LoadingDots } from '@/components/ui/loading-dots';
 import { ArrowLeft, ArrowRight, Eye, EyeOff, Lock, LogOut, Mail, User, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/language-context';
+import { LanguageSwitch } from '@/components/ui/language-switch';
 
 type AuthView = 'landing' | 'login' | 'register' | 'forgot';
 
 export function Login() {
+  const { t } = useLanguage();
   const {
     user,
     loading,
@@ -115,20 +118,20 @@ export function Login() {
   }
 
   const title = view === 'landing'
-    ? 'Habit Tracker Minimalis'
+    ? t('login.title')
     : view === 'login'
-      ? 'Masuk ke Akun'
+      ? t('login.loginTitle')
       : view === 'register'
-        ? 'Daftar Akun Baru'
-        : 'Recovery Password';
+        ? t('login.registerTitle')
+        : t('login.forgotTitle');
 
   const subtitle = view === 'landing'
-    ? 'Bangun rutinitas kecil, dapatkan hasil besar.'
+    ? t('login.subtitle')
     : view === 'login'
-      ? 'Masuk untuk melanjutkan tracking kebiasaanmu.'
+      ? t('login.loginSubtitle')
       : view === 'register'
-        ? 'Buat akun supaya data kebiasaanmu tersimpan.'
-        : 'Masukkan email akun untuk menerima link reset password.';
+        ? t('login.registerSubtitle')
+        : t('login.forgotSubtitle');
 
   return (
     <div className="min-h-screen w-full bg-background relative overflow-hidden flex items-center justify-center p-4">
@@ -153,14 +156,17 @@ export function Login() {
         className="w-full max-w-sm relative z-10"
       >
         <div className="relative bg-card/60 backdrop-blur-2xl rounded-[2rem] p-7 border border-white/30 shadow-[0_32px_64px_-16px_rgba(15,23,42,0.18)] overflow-hidden">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute top-4 right-4 z-20 rounded-full h-8 w-8 text-muted-foreground hover:bg-background/50"
-            onClick={() => setPreviewMode(true)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+            <LanguageSwitch />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full h-8 w-8 text-muted-foreground hover:bg-background/50"
+              onClick={() => setPreviewMode(true)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
 
           <div className="relative text-center space-y-4 mb-7">
@@ -192,7 +198,7 @@ export function Login() {
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within/field:text-primary" />
                       <Input
                         type="email"
-                        placeholder="Email"
+                        placeholder={t('login.emailPlaceholder')}
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                         className="h-12 pl-11 rounded-2xl bg-background/45 border-white/25 focus:bg-background/80 transition-all duration-300"
@@ -205,7 +211,7 @@ export function Login() {
                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within/field:text-primary" />
                         <Input
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="Password"
+                          placeholder={t('login.passwordPlaceholder')}
                           value={password}
                           onChange={(event) => setPassword(event.target.value)}
                           minLength={6}
@@ -216,7 +222,7 @@ export function Login() {
                           type="button"
                           onClick={() => setShowPassword((value) => !value)}
                           className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                          aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
@@ -227,7 +233,7 @@ export function Login() {
                           onClick={() => goTo('forgot')}
                           className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors"
                         >
-                          Lupa password?
+                          {t('login.forgotPassword')}
                         </button>
                       </div>
                     </div>
@@ -240,7 +246,7 @@ export function Login() {
                       className="relative w-full h-[52px] rounded-full px-12 text-[15px] font-semibold shadow-[0_16px_34px_-18px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_38px_-18px_hsl(var(--primary))] active:translate-y-0 active:scale-[0.985]"
                     >
                       <span className="mx-auto flex items-center justify-center">
-                        {isSubmitting ? <LoadingDots size={4} /> : 'Masuk ke Dashboard'}
+                        {isSubmitting ? <LoadingDots size={4} /> : t('login.enterDashboard')}
                       </span>
                       {!isSubmitting && (
                         <ArrowRight className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 opacity-80 transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -253,7 +259,7 @@ export function Login() {
                       </div>
                       <div className="relative flex justify-center text-[10px] uppercase">
                         <span className="bg-card/80 backdrop-blur px-3 text-muted-foreground/60 font-semibold tracking-[0.18em]">
-                          Opsi lainnya
+                          {t('login.orOtherOptions')}
                         </span>
                       </div>
                     </div>
@@ -266,7 +272,7 @@ export function Login() {
                       className="relative flex w-full h-[52px] items-center justify-center overflow-hidden rounded-full border border-slate-200/80 bg-white/90 px-6 text-[15px] font-semibold text-slate-800 shadow-[0_14px_30px_-18px_rgba(15,23,42,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_22px_42px_-22px_rgba(15,23,42,0.9)] active:translate-y-0 active:scale-[0.985] dark:border-white/10 dark:bg-white/10 dark:text-foreground dark:hover:bg-white/15"
                     >
                       <div className="flex items-center justify-center gap-2">
-                        <span className="text-center">Masuk dengan</span>
+                        <span className="text-center">{t('login.signInWith')}</span>
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200/70" aria-label="Google">
                           <svg className="h-[23px] w-[23px]" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -280,13 +286,13 @@ export function Login() {
                   </div>
 
                   <p className="pt-2 text-center text-[11px] text-muted-foreground">
-                    Baru di sini?{' '}
+                    {t('login.newHere')}{' '}
                     <button
                       type="button"
                       onClick={() => goTo('register')}
                       className="text-primary font-semibold hover:underline underline-offset-4 decoration-2"
                     >
-                      Buat akun baru
+                      {t('login.createNewAccount')}
                     </button>
                   </p>
                 </form>
@@ -297,7 +303,7 @@ export function Login() {
                       <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within/field:text-primary" />
                       <Input
                         type="text"
-                        placeholder="Nama lengkap"
+                        placeholder={t('login.fullNamePlaceholder')}
                         value={name}
                         onChange={(event) => setName(event.target.value)}
                         className="h-12 pl-11 rounded-2xl bg-background/45 border-white/25 focus:bg-background/80 transition-all duration-300"
@@ -310,7 +316,7 @@ export function Login() {
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within/field:text-primary" />
                     <Input
                       type="email"
-                      placeholder="Email"
+                      placeholder={t('login.emailPlaceholder')}
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       className="h-12 pl-11 rounded-2xl bg-background/45 border-white/25 focus:bg-background/80 transition-all duration-300"
@@ -323,7 +329,7 @@ export function Login() {
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within/field:text-primary" />
                       <Input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Password minimal 6 karakter"
+                        placeholder={t('login.passwordMinPlaceholder')}
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         minLength={6}
@@ -334,7 +340,7 @@ export function Login() {
                         type="button"
                         onClick={() => setShowPassword((value) => !value)}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                        aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -351,7 +357,7 @@ export function Login() {
                         <LoadingDots size={4} />
                       ) : (
                         <>
-                          {view === 'register' ? 'Buat Akun Sekarang' : 'Kirim Instruksi Reset'}
+                          {view === 'register' ? t('login.createAccountNow') : t('login.sendResetInstructions')}
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
@@ -364,7 +370,7 @@ export function Login() {
                       className="w-full h-12 rounded-2xl gap-2 text-muted-foreground hover:bg-background/45 transition-all duration-300"
                     >
                       <ArrowLeft className="w-4 h-4" />
-                      Kembali
+                      {t('login.back')}
                     </Button>
                   </div>
                 </form>

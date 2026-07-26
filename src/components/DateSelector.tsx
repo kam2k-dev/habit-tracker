@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface DateSelectorProps {
   selectedDate: string;
@@ -8,6 +9,7 @@ interface DateSelectorProps {
 }
 
 export function DateSelector({ selectedDate, onDateChange }: DateSelectorProps) {
+  const { t, language } = useLanguage();
   const { displayDate, isToday } = useMemo(() => {
     const date = new Date(selectedDate);
     const today = new Date();
@@ -23,11 +25,12 @@ export function DateSelector({ selectedDate, onDateChange }: DateSelectorProps) 
       day: 'numeric',
     };
     
+    const localeStr = language === 'id' ? 'id-ID' : 'en-US';
     return {
-      displayDate: date.toLocaleDateString('id-ID', options),
+      displayDate: date.toLocaleDateString(localeStr, options),
       isToday,
     };
-  }, [selectedDate]);
+  }, [selectedDate, language]);
 
   const goToPreviousDay = () => {
     const date = new Date(selectedDate);
@@ -62,7 +65,7 @@ export function DateSelector({ selectedDate, onDateChange }: DateSelectorProps) 
           <span className="text-sm font-medium">{displayDate}</span>
           {isToday && (
             <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
-              Hari Ini
+              {t('dateSelector.today')}
             </span>
           )}
         </div>
@@ -84,7 +87,7 @@ export function DateSelector({ selectedDate, onDateChange }: DateSelectorProps) 
           onClick={goToToday}
           className="text-sm"
         >
-          Ke Hari Ini
+          {t('dateSelector.today')}
         </Button>
       )}
     </div>

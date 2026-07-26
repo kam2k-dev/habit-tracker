@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Flame, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/language-context';
 
 import type { Variants } from 'framer-motion';
 
@@ -35,8 +36,9 @@ interface DailyHeroProps {
 }
 
 export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodCount, badCount }: DailyHeroProps) => {
+  const { t } = useLanguage();
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Selamat Pagi' : hour < 18 ? 'Selamat Siang' : 'Selamat Malam';
+  const greeting = hour < 12 ? t('hero.goodMorning') : hour < 18 ? t('hero.goodAfternoon') : t('hero.goodEvening');
   const progress = totalHabits > 0 ? Math.round((completedCount / totalHabits) * 100) : 0;
   const isAllDone = totalHabits > 0 && progress === 100;
 
@@ -69,10 +71,10 @@ export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodC
               </motion.h2>
               <motion.p variants={itemVariants} className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {totalHabits === 0 
-                  ? "Belum ada kebiasaan yang ditambahkan."
+                  ? t('hero.noHabits')
                   : isAllDone
-                    ? "Luar biasa! Semua habit selesai 🏆" 
-                    : `Yuk, buat perubahan kecil hari ini. ${completedCount}/${totalHabits} selesai.`}
+                    ? t('hero.allDone') 
+                    : t('hero.progressText', { completed: completedCount, total: totalHabits })}
               </motion.p>
             </div>
             <motion.div
@@ -116,7 +118,7 @@ export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodC
               <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                  Progres Hari Ini
+                  {t('hero.completionRate')}
                 </span>
                 <motion.span
                   key={progress}
@@ -158,7 +160,7 @@ export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodC
               <motion.div variants={itemVariants} className="flex flex-col items-center justify-center px-1 text-center">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
                   <Flame className="h-3 w-3 text-orange-500 fill-orange-500/20 shrink-0" />
-                  Streak
+                  {t('hero.activeStreak')}
                 </span>
                 <motion.span
                   key={streak}
@@ -173,7 +175,7 @@ export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodC
               <motion.div variants={itemVariants} className="flex flex-col items-center justify-center px-1 text-center">
                 <span className="text-[10px] font-bold text-emerald-600/80 dark:text-emerald-400/80 uppercase tracking-wider mb-1 flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
-                  Baik
+                  {t('tabs.good')}
                 </span>
                 <motion.span
                   key={goodCount}
@@ -188,7 +190,7 @@ export const DailyHero = ({ userName, totalHabits, completedCount, streak, goodC
               <motion.div variants={itemVariants} className="flex flex-col items-center justify-center px-1 text-center">
                 <span className="text-[10px] font-bold text-rose-600/80 dark:text-rose-400/80 uppercase tracking-wider mb-1 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3 text-rose-500 shrink-0" />
-                  Buruk
+                  {t('tabs.bad')}
                 </span>
                 <motion.span
                   key={badCount}

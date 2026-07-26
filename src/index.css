@@ -503,3 +503,42 @@
 .dark .bg-gray-900 {
   background-color: hsl(var(--foreground));
 }
+
+/* iOS / macOS Ultra-Smooth 60-120 FPS Dock Expansion (GPU-Composited, Zero Jank) */
+@keyframes genieIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, calc(-50% + 140px), 0) scale3d(0.12, 0.12, 1);
+    transform-origin: center bottom;
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale3d(1, 1, 1);
+    transform-origin: center bottom;
+  }
+}
+
+@keyframes genieOut {
+  from {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale3d(1, 1, 1);
+    transform-origin: center bottom;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-50%, calc(-50% + 140px), 0) scale3d(0.12, 0.12, 1);
+    transform-origin: center bottom;
+  }
+}
+
+.animate-genie-in,
+[data-state="open"].data-\[state\=open\]\:animate-genie-in {
+  animation: genieIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  will-change: transform, opacity;
+}
+
+.animate-genie-out,
+[data-state="closed"].data-\[state\=closed\]\:animate-genie-out {
+  animation: genieOut 0.22s cubic-bezier(0.32, 0, 0.67, 0) forwards !important;
+  will-change: transform, opacity;
+}
