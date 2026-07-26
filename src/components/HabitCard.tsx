@@ -74,8 +74,6 @@ export function HabitCard({
   // Swipe gesture state
   const x = useMotionValue(0);
   const [isSwiping, setIsSwiping] = useState(false);
-  const swipeStartX = useRef(0);
-  const SWIPE_THRESHOLD = 50; // Lower threshold for more responsive swipe
   
   // Long press detection for mobile detail popup
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -83,45 +81,52 @@ export function HabitCard({
   const touchStartY = useRef(0);
   const touchStartX = useRef(0);
 
-  // Handle touch start for swipe
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    swipeStartX.current = e.touches[0].clientX;
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    setIsSwiping(true);
-    
-    // Long press detection
-    isLongPress.current = false;
-    longPressTimer.current = setTimeout(() => {
-      isLongPress.current = true;
-      setIsDetailPopupOpen(true);
-      if (navigator.vibrate) navigator.vibrate(50);
-    }, 500);
-  }, []);
+  // iOS-style dynamic icon scaling & opacity transforms as user drags
+  const deleteIconScale = useTransform(x, [-120, -50, 0], [1.25, 1, 0.5]);
+  const deleteOpacity = useTransform(x, [-80, -30, 0], [1, 0.7, 0]);
 
-  // Handle touch move for swipe with smooth tracking
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isSwiping) return;
-    
-    const touchX = e.touches[0].clientX;
-    const touchY = e.touches[0].clientY;
-    const diffX = touchX - swipeStartX.current;
-    const diffY = Math.abs(touchY - touchStartY.current);
-    
-    // Cancel long press if moving horizontally or vertically
-    if ((Math.abs(diffX) > 10 || diffY > 10) && longPressTimer.current) {
+  const completeIconScale = useTransform(x, [0, 50, 120], [0.5, 1, 1.25]);
+  const completeOpacity = useTransform(x, [0, 30, 80], [0, 0.7, 1]);
+
+  const hasDragged = useRef(false);
+
+  // Helper to clear long press timer
+  const cancelLongPress = useCallback(() => {
+    if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+  }, []);
+
+  // Handle touch start for long press
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    hasDragged.current = false;
     
-    // Only allow swipe if not dragging vertically significantly
-    if (diffY < Math.abs(diffX) * 0.5) {
-      // Less resistance for more responsive feel
-      const resistance = 0.95;
-      const dampedX = diffX * resistance;
-      x.set(dampedX);
+    isLongPress.current = false;
+    cancelLongPress();
+    longPressTimer.current = setTimeout(() => {
+      // Only open popup if user has not dragged/swiped at all
+      if (!hasDragged.current && Math.abs(x.get()) < 5) {
+        isLongPress.current = true;
+        setIsDetailPopupOpen(true);
+        if (navigator.vibrate) navigator.vibrate(50);
+      }
+    }, 500);
+  }, [cancelLongPress, x]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const diffX = Math.abs(touchX - touchStartX.current);
+    const diffY = Math.abs(touchY - touchStartY.current);
+
+    if (diffX > 8 || diffY > 8) {
+      hasDragged.current = true;
+      cancelLongPress();
     }
-  }, [isSwiping, x]);
+  }, [cancelLongPress]);
 
   const isGood = habit.type === 'good';
   
@@ -191,51 +196,50 @@ export function HabitCard({
     }, delay);
   };
 
-  // Handle touch end for swipe with iOS-style spring animation
-  const handleTouchEnd = useCallback(() => {
+  // Handle swipe end with Apple iOS fluid spring physics
+  const handleSwipeEnd = useCallback((_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
     setIsSwiping(false);
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
+    cancelLongPress();
+    
+    const offsetX = info.offset.x;
+    const velocityX = info.velocity.x;
+
+    if (Math.abs(offsetX) > 8 || Math.abs(velocityX) > 50) {
+      hasDragged.current = true;
     }
     
-    const currentX = x.get();
-    const velocity = x.getVelocity();
-    
-    // iOS-style spring config - faster snap back
+    // Apple iOS fluid spring config
     const iosSpring = {
       type: 'spring' as const,
-      stiffness: 500,
-      damping: 30,
-      mass: 0.6,
-      velocity: velocity * 0.5
+      stiffness: 420,
+      damping: 28,
+      mass: 0.65,
     };
     
-    // Lower velocity threshold for easier triggering
-    const velocityThreshold = 300;
-    
-    // Swipe right - toggle complete/uncheck
-    if (currentX > SWIPE_THRESHOLD || (currentX > 20 && velocity > velocityThreshold)) {
+    // Swipe right - toggle complete
+    if (offsetX > 55 || velocityX > 250) {
+      animate(x, 0, iosSpring);
       if (canToggle) {
-        animate(x, 0, iosSpring);
-        // Haptic feedback on action
-        if (navigator.vibrate) navigator.vibrate(10);
+        if (navigator.vibrate) navigator.vibrate(15);
         handleCheckboxToggle();
-      } else {
-        animate(x, 0, iosSpring);
       }
     }
     // Swipe left - delete
-    else if (currentX < -SWIPE_THRESHOLD || (currentX < -20 && velocity < -velocityThreshold)) {
+    else if (offsetX < -55 || velocityX < -250) {
       animate(x, 0, iosSpring);
-      if (navigator.vibrate) navigator.vibrate(10);
+      if (navigator.vibrate) navigator.vibrate(15);
       setIsDeleteDialogOpen(true);
     }
-    // Reset with quick snap
+    // Reset with spring
     else {
       animate(x, 0, iosSpring);
     }
-  }, [x, isCompleted, isToday, habit.archived, canToggle]);
+
+    // Reset hasDragged after click event propagation window closes
+    setTimeout(() => {
+      hasDragged.current = false;
+    }, 150);
+  }, [x, canToggle, handleCheckboxToggle, cancelLongPress]);
 
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -279,50 +283,58 @@ export function HabitCard({
         style={{ willChange: 'transform, opacity' }}
         className="relative"
       >
-        {/* Swipe Background Layer - Icons on exposed side */}
-        <div className="absolute inset-0 rounded-lg overflow-hidden">
-          {/* Left side - Delete (Red) - icon on RIGHT so it's visible when swiping left */}
+        {/* Swipe Background Layer - Dynamic scaling iOS action icons */}
+        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+          {/* Left side - Delete (Red) */}
           <motion.div 
-            className="absolute inset-y-0 left-0 w-full bg-rose-500 flex items-center justify-end"
-            style={{ 
-              opacity: useTransform(x, [-80, -40, 0], [1, 0.5, 0]),
-              x: useTransform(x, [-80, 0], [-20, 0]),
-            }}
+            className="absolute inset-y-0 left-0 w-full bg-rose-500/90 dark:bg-rose-600/90 backdrop-blur-md flex items-center justify-end pr-6"
+            style={{ opacity: deleteOpacity }}
           >
-            <div className="pr-5">
-              <Trash2 className="h-7 w-7 text-white drop-shadow-md" />
-            </div>
+            <motion.div style={{ scale: deleteIconScale }}>
+              <Trash2 className="h-6 w-6 text-white drop-shadow-md" />
+            </motion.div>
           </motion.div>
-          {/* Right side - Complete/Uncheck - icon on LEFT so it's visible when swiping right */}
+
+          {/* Right side - Complete/Uncheck (Emerald/Amber) */}
           <motion.div 
-            className={`absolute inset-y-0 right-0 w-full flex items-center justify-start ${isCompleted ? 'bg-amber-500' : 'bg-emerald-500'}`}
-            style={{ 
-              opacity: useTransform(x, [0, 40, 80], [0, 0.5, 1]),
-              x: useTransform(x, [0, 80], [20, 0]),
-            }}
+            className={`absolute inset-y-0 right-0 w-full backdrop-blur-md flex items-center justify-start pl-6 ${
+              isCompleted 
+                ? 'bg-amber-500/90 dark:bg-amber-600/90' 
+                : 'bg-emerald-500/90 dark:bg-emerald-600/90'
+            }`}
+            style={{ opacity: completeOpacity }}
           >
-            <div className="pl-5">
+            <motion.div style={{ scale: completeIconScale }}>
               {isCompleted ? (
-                <RotateCcw className="h-7 w-7 text-white drop-shadow-md" />
+                <RotateCcw className="h-6 w-6 text-white drop-shadow-md" />
               ) : (
-                <Check className="h-7 w-7 text-white drop-shadow-md" />
+                <Check className="h-6 w-6 text-white drop-shadow-md" />
               )}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
 
-        {/* Main Card with Swipe */}
+        {/* Main Card with Framer Motion Drag */}
         <motion.div
           style={{ x }}
+          drag="x"
+          dragConstraints={{ left: -100, right: 100 }}
+          dragElastic={0.35}
+          onDragStart={() => {
+            setIsSwiping(true);
+            hasDragged.current = true;
+            cancelLongPress();
+          }}
+          onDrag={() => {
+            hasDragged.current = true;
+            cancelLongPress();
+          }}
+          onDragEnd={handleSwipeEnd}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          drag={isTouchDevice ? 'x' : false}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.3}
         >
           <Card 
-            className={`habit-card p-4 transition-all duration-300 relative overflow-hidden group transform-gpu will-change-transform hover:-translate-y-1 hover:shadow-xl hover:border-primary/20 ${
+            className={`habit-card p-4 transition-colors transition-shadow duration-300 relative overflow-hidden group transform-gpu will-change-transform hover:-translate-y-1 hover:shadow-xl hover:border-primary/20 ${
               isDragging ? 'dragging scale-[1.02] shadow-2xl z-50' : ''
             } ${isSwiping ? 'cursor-grabbing' : ''} ${
               isCompleted 
@@ -366,7 +378,14 @@ export function HabitCard({
             {/* Habit Info - Tengah sampai Kanan untuk Drag */}
             <div 
               className={`flex-1 min-w-0 ${canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={(e) => {
+                if (hasDragged.current || Math.abs(x.get()) > 5) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                setIsExpanded(!isExpanded);
+              }}
             >
               <div className="flex flex-col justify-center gap-1.5 py-0.5">
                 <div className="flex items-center justify-between gap-3">
