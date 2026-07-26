@@ -44,29 +44,29 @@ export function FloatingBottomNav({
         className,
       )}
     >
-      {/* Bar wrapper */}
+      {/* Bar wrapper - Instagram Floating Navbar Spec (h-16 64px, rounded-full / rounded-[34px]) */}
       <div
         className={cn(
-          'relative flex items-center justify-between overflow-visible h-[54px] p-1 rounded-[27px]',
-          /* Blur & Saturation (iOS Material effect) */
+          'relative flex items-center justify-between overflow-visible h-16 p-1 rounded-[34px]',
+          /* Blur & Saturation (iOS / Instagram Liquid Glass effect) */
           'backdrop-blur-[40px] backdrop-saturate-[180%]',
-          /* Background Opacity (WhatsApp iOS style uses a milky/dark translucent background) */
-          'bg-white/50 dark:bg-[#1c1c1e]/65',
+          /* Background Opacity */
+          'bg-white/50 dark:bg-[#1c1c1e]/70',
           /* Thin subtle border */
-          'border border-white/50 dark:border-white/10',
+          'border border-white/60 dark:border-white/10',
           /* Shadow for depth */
-          'shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)]',
+          'shadow-[0_10px_36px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_36px_rgba(0,0,0,0.5)]',
         )}
       >
-        {/* Subtle radial highlight inside clipped background */}
-        <div className="pointer-events-none absolute inset-0 -z-20 rounded-[inherit] overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.55),transparent_28%),radial-gradient(circle_at_82%_88%,rgba(255,255,255,0.18),transparent_36%)] opacity-80 dark:opacity-30" />
+        {/* Subtle radial highlight inside background */}
+        <div className="pointer-events-none absolute inset-0 -z-20 rounded-[inherit] overflow-hidden bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.6),transparent_28%),radial-gradient(circle_at_82%_88%,rgba(255,255,255,0.2),transparent_36%)] opacity-80 dark:opacity-30" />
 
         {items.map((item) => {
           const isActive = activeTab === item.id;
           const isAdd = item.id === 'add';
           const Icon = item.icon;
 
-          /* ---- FAB (centre - Top Layer z-30) ---- */
+          /* ---- FAB (centre - Instagram Standard Top Layer z-30) ---- */
           if (isAdd) {
             return (
               <button
@@ -80,12 +80,12 @@ export function FloatingBottomNav({
                   whileTap={{ scale: 0.88, rotate: 180 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 20 }}
                   className={cn(
-                    'relative z-30 flex items-center justify-center rounded-full border border-white/60 bg-white/50 backdrop-blur-2xl h-[46px] w-[46px] mx-auto',
-                    'shadow-[0_4px_18px_rgba(15,23,42,0.15),inset_0_1px_1px_rgba(255,255,255,0.8)]',
-                    'dark:border-white/20 dark:bg-white/[0.15] dark:shadow-[0_4px_18px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.2)]',
+                    'relative z-30 flex items-center justify-center rounded-full border border-white/70 bg-white/60 backdrop-blur-2xl h-12 w-12 mx-auto',
+                    'shadow-[0_4px_20px_rgba(15,23,42,0.16),inset_0_1px_1px_rgba(255,255,255,0.85)]',
+                    'dark:border-white/20 dark:bg-white/[0.16] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.22)]',
                   )}
                 >
-                  <Plus className="text-foreground drop-shadow-sm dark:text-white h-5 w-5" />
+                  <Plus className="text-foreground drop-shadow-sm dark:text-white h-6 w-6" />
                 </motion.div>
               </button>
             );
@@ -98,19 +98,19 @@ export function FloatingBottomNav({
               onClick={() => onTabChange(item.id)}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="relative z-10 flex flex-col items-center justify-center w-[19%] h-full rounded-[23px] md:rounded-full group hover:rounded-full transition-all duration-300 overflow-hidden"
+              className="relative z-10 flex flex-col items-center justify-center w-[19%] h-full rounded-[24px] md:rounded-full group hover:rounded-full transition-all duration-300 overflow-hidden"
             >
-              {/* iOS Liquid Glass Sliding Pill Indicator (Desktop Circular Hover & Inset Fit) */}
+              {/* iOS Liquid Glass Sliding Pill Indicator (Instagram h-12 Fit) */}
               {isActive && (
                 <motion.div
                   layoutId="activeTabPill"
                   layout="position"
                   className={cn(
-                    "absolute inset-0 rounded-[23px] md:rounded-full -z-10 backdrop-blur-xl border border-transparent transition-colors duration-300",
-                    item.id === 'today' && "bg-blue-500/25 dark:bg-blue-500/35 shadow-[0_2px_16px_rgba(59,130,246,0.4)] dark:shadow-[0_2px_16px_rgba(59,130,246,0.5)]",
-                    item.id === 'good' && "bg-emerald-500/25 dark:bg-emerald-500/35 shadow-[0_2px_16px_rgba(16,185,129,0.4)] dark:shadow-[0_2px_16px_rgba(16,185,129,0.5)]",
-                    item.id === 'bad' && "bg-rose-500/25 dark:bg-rose-500/35 shadow-[0_2px_16px_rgba(244,63,94,0.4)] dark:shadow-[0_2px_16px_rgba(244,63,94,0.5)]",
-                    item.id === 'stats' && "bg-purple-500/25 dark:bg-purple-500/35 shadow-[0_2px_16px_rgba(168,85,247,0.4)] dark:shadow-[0_2px_16px_rgba(168,85,247,0.5)]"
+                    "absolute inset-0 rounded-[24px] md:rounded-full -z-10 backdrop-blur-xl border border-transparent transition-colors duration-300",
+                    item.id === 'today' && "bg-blue-500/25 dark:bg-blue-500/35 shadow-[0_4px_20px_rgba(59,130,246,0.38)] dark:shadow-[0_4px_20px_rgba(59,130,246,0.48)]",
+                    item.id === 'good' && "bg-emerald-500/25 dark:bg-emerald-500/35 shadow-[0_4px_20px_rgba(16,185,129,0.38)] dark:shadow-[0_4px_20px_rgba(16,185,129,0.48)]",
+                    item.id === 'bad' && "bg-rose-500/25 dark:bg-rose-500/35 shadow-[0_4px_20px_rgba(244,63,94,0.38)] dark:shadow-[0_4px_20px_rgba(244,63,94,0.48)]",
+                    item.id === 'stats' && "bg-purple-500/25 dark:bg-purple-500/35 shadow-[0_4px_20px_rgba(168,85,247,0.38)] dark:shadow-[0_4px_20px_rgba(168,85,247,0.48)]"
                   )}
                   transition={{
                     type: 'spring',
@@ -138,7 +138,7 @@ export function FloatingBottomNav({
               >
                 <Icon
                   className={cn(
-                    'transition-colors duration-300 ease-out h-[22px] w-[22px]',
+                    'transition-colors duration-300 ease-out h-6 w-6',
                     isActive
                       ? cn('drop-shadow-sm', item.activeColor)
                       : item.color,
