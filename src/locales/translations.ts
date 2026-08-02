@@ -190,6 +190,10 @@ export interface Translations {
     removeAvatar: string;
     save: string;
     close: string;
+    swipeDirection: string;
+    swipeDirectionDesc: string;
+    swipeLeft: string;
+    swipeRight: string;
   };
   toast: {
     habitAdded: string;
@@ -211,7 +215,7 @@ export const translations: Record<Language, Translations> = {
       lightMode: 'Mode Terang',
       deleteAll: 'Hapus Semua Kebiasaan',
       logout: 'Keluar',
-      signInSignUp: 'Masuk / Daftar',
+      signInSignUp: 'Masuk',
       language: 'Bahasa',
       indonesian: 'Bahasa Indonesia',
       english: 'English',
@@ -392,6 +396,10 @@ export const translations: Record<Language, Translations> = {
       removeAvatar: 'Hapus Avatar Kustom',
       save: 'Simpan',
       close: 'Batal',
+      swipeDirection: 'Arah Geser Selesai',
+      swipeDirectionDesc: 'Pilih arah geser untuk menandai habit selesai',
+      swipeLeft: 'Geser Kiri',
+      swipeRight: 'Geser Kanan',
     },
     toast: {
       habitAdded: 'Kebiasaan baru berhasil ditambahkan!',
@@ -411,7 +419,7 @@ export const translations: Record<Language, Translations> = {
       lightMode: 'Light Mode',
       deleteAll: 'Delete All Habits',
       logout: 'Log Out',
-      signInSignUp: 'Sign In / Sign Up',
+      signInSignUp: 'Sign In',
       language: 'Language',
       indonesian: 'Bahasa Indonesia',
       english: 'English',
@@ -592,6 +600,10 @@ export const translations: Record<Language, Translations> = {
       removeAvatar: 'Remove Custom Avatar',
       save: 'Save',
       close: 'Cancel',
+      swipeDirection: 'Complete Swipe Direction',
+      swipeDirectionDesc: 'Choose swipe direction to mark habit as complete',
+      swipeLeft: 'Swipe Left',
+      swipeRight: 'Swipe Right',
     },
     toast: {
       habitAdded: 'New habit added successfully!',

@@ -78,7 +78,7 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                   onClick={onRequestSignIn}
                   className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs font-semibold leading-none bg-primary text-primary-foreground hover:opacity-90 transition shadow-sm"
                 >
-                  Sign In / Sign Up
+                  {t('nav.signInSignUp')}
                 </button>
               </div>
             ) : (

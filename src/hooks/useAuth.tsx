@@ -19,6 +19,27 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
+// Dev mode user for testing without Firebase
+const DEV_USER: User = {
+  uid: 'dev-user-123',
+  email: 'dev@habittracker.test',
+  displayName: 'Dev Tester',
+  photoURL: null,
+  emailVerified: true,
+  isAnonymous: false,
+  metadata: {},
+  providerData: [],
+  refreshToken: '',
+  tenantId: null,
+  delete: async () => {},
+  getIdToken: async () => 'dev-token',
+  getIdTokenResult: async () => ({} as any),
+  reload: async () => {},
+  toJSON: () => ({}),
+  phoneNumber: null,
+  providerId: 'dev',
+} as unknown as User;
+
 export type ReauthPayload = {
   password?: string;
 };
@@ -29,7 +50,9 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isPreviewMode: boolean;
+  isDevMode: boolean;
   setPreviewMode: (val: boolean) => void;
+  setDevMode: (val: boolean) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, pass: string) => Promise<void>;
   signUpWithEmail: (email: string, pass: string, name: string) => Promise<void>;
@@ -50,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPreviewMode, setIsPreviewMode] = useState(true);
+  const [isDevMode, setIsDevMode] = useState(false);
   const [forceShowLogin, setForceShowLogin] = useState(false);
   const isLoggingOut = useRef(false);
 
@@ -145,15 +169,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       // Always enable preview mode (main menu) after logout - no login required
-      if (!isPreviewMode) {
+      if (!isPreviewMode && !isDevMode) {
         await signOut(auth);
       }
       setIsPreviewMode(true);
+      setIsDevMode(false);
       setForceShowLogin(false);
     } catch (error) {
       console.error('Error signing out:', error);
       // Still enable preview mode even if signOut fails
       setIsPreviewMode(true);
+      setIsDevMode(false);
       setForceShowLogin(false);
     } finally {
       isLoggingOut.current = false;
@@ -165,6 +191,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Exit preview mode so the login page is rendered
     setIsPreviewMode(false);
     setForceShowLogin(true);
+  };
+
+  const setDevMode = (val: boolean) => {
+    setIsDevMode(val);
+    if (val) {
+      setUser(DEV_USER);
+      setIsPreviewMode(false);
+      setForceShowLogin(false);
+    } else {
+      setUser(null);
+      setIsPreviewMode(true);
+    }
   };
 
   const reauthenticateCurrent = async (currentUser: User, reauth?: ReauthPayload) => {
@@ -283,10 +321,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       isPreviewMode: isPreviewMode && !forceShowLogin,
+      isDevMode,
       setPreviewMode: (val: boolean) => {
         setIsPreviewMode(val);
         setForceShowLogin(!val);
+        if (val) setIsDevMode(false);
       },
+      setDevMode,
       signInWithGoogle,
       signInWithEmail,
       signUpWithEmail,

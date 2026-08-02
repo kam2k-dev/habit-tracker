@@ -27,6 +27,7 @@ import { motion, useMotionValue, useTransform, animate, AnimatePresence } from '
 import { useConfetti } from '@/hooks/useConfetti';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useLanguage } from '@/context/language-context';
+import { useSettings } from '@/context/settings-context';
 
 interface HabitCardProps {
   habit: Habit;
@@ -62,6 +63,7 @@ export function HabitCard({
   recentLogs = []
 }: HabitCardProps) {
   const { t } = useLanguage();
+  const { swipeDirection } = useSettings();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editName, setEditName] = useState(habit.name);
@@ -82,11 +84,13 @@ export function HabitCard({
   const touchStartX = useRef(0);
 
   // iOS-style dynamic icon scaling & opacity transforms as user drags
-  const deleteIconScale = useTransform(x, [-120, -50, 0], [1.25, 1, 0.5]);
-  const deleteOpacity = useTransform(x, [-80, -30, 0], [1, 0.7, 0]);
+  const isCompleteLeft = swipeDirection === 'left';
+  
+  const deleteIconScale = useTransform(x, isCompleteLeft ? [0, 50, 120] : [-120, -50, 0], [0.5, 1, 1.25]);
+  const deleteOpacity = useTransform(x, isCompleteLeft ? [0, 30, 80] : [-80, -30, 0], [0, 0.7, 1]);
 
-  const completeIconScale = useTransform(x, [0, 50, 120], [0.5, 1, 1.25]);
-  const completeOpacity = useTransform(x, [0, 30, 80], [0, 0.7, 1]);
+  const completeIconScale = useTransform(x, isCompleteLeft ? [-120, -50, 0] : [0, 50, 120], [1.25, 1, 0.5]);
+  const completeOpacity = useTransform(x, isCompleteLeft ? [-80, -30, 0] : [0, 30, 80], [1, 0.7, 0]);
 
   const hasDragged = useRef(false);
 
@@ -126,6 +130,10 @@ export function HabitCard({
       hasDragged.current = true;
       cancelLongPress();
     }
+  }, [cancelLongPress]);
+
+  const handleTouchEnd = useCallback(() => {
+    cancelLongPress();
   }, [cancelLongPress]);
 
   const isGood = habit.type === 'good';
@@ -216,19 +224,35 @@ export function HabitCard({
       mass: 0.65,
     };
     
-    // Swipe right - toggle complete
+    // Swipe right
     if (offsetX > 55 || velocityX > 250) {
       animate(x, 0, iosSpring);
-      if (canToggle) {
+      if (isCompleteLeft) {
+        // Delete
         if (navigator.vibrate) navigator.vibrate(15);
-        handleCheckboxToggle();
+        setIsDeleteDialogOpen(true);
+      } else {
+        // Complete
+        if (canToggle) {
+          if (navigator.vibrate) navigator.vibrate(15);
+          handleCheckboxToggle();
+        }
       }
     }
-    // Swipe left - delete
+    // Swipe left
     else if (offsetX < -55 || velocityX < -250) {
       animate(x, 0, iosSpring);
-      if (navigator.vibrate) navigator.vibrate(15);
-      setIsDeleteDialogOpen(true);
+      if (isCompleteLeft) {
+        // Complete
+        if (canToggle) {
+          if (navigator.vibrate) navigator.vibrate(15);
+          handleCheckboxToggle();
+        }
+      } else {
+        // Delete
+        if (navigator.vibrate) navigator.vibrate(15);
+        setIsDeleteDialogOpen(true);
+      }
     }
     // Reset with spring
     else {
@@ -239,7 +263,7 @@ export function HabitCard({
     setTimeout(() => {
       hasDragged.current = false;
     }, 150);
-  }, [x, canToggle, handleCheckboxToggle, cancelLongPress]);
+  }, [x, canToggle, handleCheckboxToggle, cancelLongPress, isCompleteLeft]);
 
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -285,30 +309,46 @@ export function HabitCard({
       >
         {/* Swipe Background Layer - Dynamic scaling iOS action icons */}
         <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-          {/* Left side - Delete (Red) */}
+          {/* Left side - Complete/Delete based on setting */}
           <motion.div 
-            className="absolute inset-y-0 left-0 w-full bg-rose-500/90 dark:bg-rose-600/90 backdrop-blur-md flex items-center justify-end pr-6"
-            style={{ opacity: deleteOpacity }}
+            className={`absolute inset-y-0 left-0 w-full backdrop-blur-md flex items-center justify-end pr-6 ${
+              isCompleteLeft 
+                ? (isCompleted ? 'bg-amber-500/90 dark:bg-amber-600/90' : 'bg-emerald-500/90 dark:bg-emerald-600/90')
+                : 'bg-rose-500/90 dark:bg-rose-600/90'
+            }`}
+            style={{ opacity: isCompleteLeft ? completeOpacity : deleteOpacity }}
           >
-            <motion.div style={{ scale: deleteIconScale }}>
-              <Trash2 className="h-6 w-6 text-white drop-shadow-md" />
+            <motion.div style={{ scale: isCompleteLeft ? completeIconScale : deleteIconScale }}>
+              {isCompleteLeft ? (
+                isCompleted ? (
+                  <RotateCcw className="h-6 w-6 text-white drop-shadow-md" />
+                ) : (
+                  <Check className="h-6 w-6 text-white drop-shadow-md" />
+                )
+              ) : (
+                <Trash2 className="h-6 w-6 text-white drop-shadow-md" />
+              )}
             </motion.div>
           </motion.div>
 
-          {/* Right side - Complete/Uncheck (Emerald/Amber) */}
+          {/* Right side - Delete/Complete based on setting */}
           <motion.div 
             className={`absolute inset-y-0 right-0 w-full backdrop-blur-md flex items-center justify-start pl-6 ${
-              isCompleted 
-                ? 'bg-amber-500/90 dark:bg-amber-600/90' 
-                : 'bg-emerald-500/90 dark:bg-emerald-600/90'
+              isCompleteLeft 
+                ? 'bg-rose-500/90 dark:bg-rose-600/90'
+                : (isCompleted ? 'bg-amber-500/90 dark:bg-amber-600/90' : 'bg-emerald-500/90 dark:bg-emerald-600/90')
             }`}
-            style={{ opacity: completeOpacity }}
+            style={{ opacity: isCompleteLeft ? deleteOpacity : completeOpacity }}
           >
-            <motion.div style={{ scale: completeIconScale }}>
-              {isCompleted ? (
-                <RotateCcw className="h-6 w-6 text-white drop-shadow-md" />
+            <motion.div style={{ scale: isCompleteLeft ? deleteIconScale : completeIconScale }}>
+              {isCompleteLeft ? (
+                <Trash2 className="h-6 w-6 text-white drop-shadow-md" />
               ) : (
-                <Check className="h-6 w-6 text-white drop-shadow-md" />
+                isCompleted ? (
+                  <RotateCcw className="h-6 w-6 text-white drop-shadow-md" />
+                ) : (
+                  <Check className="h-6 w-6 text-white drop-shadow-md" />
+                )
               )}
             </motion.div>
           </motion.div>
@@ -332,6 +372,7 @@ export function HabitCard({
           onDragEnd={handleSwipeEnd}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <Card 
             className={`habit-card p-4 transition-colors transition-shadow duration-300 relative overflow-hidden group transform-gpu will-change-transform hover:-translate-y-1 hover:shadow-xl hover:border-primary/20 ${
@@ -379,12 +420,13 @@ export function HabitCard({
             <div 
               className={`flex-1 min-w-0 ${canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
               onClick={(e) => {
-                if (hasDragged.current || Math.abs(x.get()) > 5) {
+                if (hasDragged.current || Math.abs(x.get()) > 5 || isLongPress.current) {
                   e.preventDefault();
                   e.stopPropagation();
+                  isLongPress.current = false;
                   return;
                 }
-                setIsExpanded(!isExpanded);
+                setIsExpanded(prev => !prev);
               }}
             >
               <div className="flex flex-col justify-center gap-1.5 py-0.5">
@@ -547,7 +589,10 @@ export function HabitCard({
                     variant="link" 
                     size="sm" 
                     className="h-auto p-0 text-[10px] text-muted-foreground hover:text-primary flex items-center gap-1"
-                    onClick={() => setIsDetailPopupOpen(true)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsDetailPopupOpen(true);
+                    }}
                   >
                     {t('dayDetail.title')} <ChevronRight className="h-3 w-3" />
                   </Button>

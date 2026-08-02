@@ -20,8 +20,25 @@ import {
 const LOCAL_CACHE_VERSION = 'v1';
 const getCacheKey = (userId: string) => `habit-tracker:${LOCAL_CACHE_VERSION}:${userId}`;
 
+// Dummy data for dev mode
+const DEV_HABITS: Habit[] = [
+  { id: 'dev-1', name: 'Minum Air 2L', type: 'good', createdAt: new Date().toISOString(), archived: false },
+  { id: 'dev-2', name: 'Olahraga 30 Menit', type: 'good', createdAt: new Date().toISOString(), archived: false },
+  { id: 'dev-3', name: 'Baca Buku 10 Halaman', type: 'good', createdAt: new Date().toISOString(), archived: false },
+  { id: 'dev-4', name: 'Begadang', type: 'bad', createdAt: new Date().toISOString(), archived: false },
+  { id: 'dev-5', name: 'Scroll Sosmed Berlebihan', type: 'bad', createdAt: new Date().toISOString(), archived: false },
+];
+
+const DEV_LOGS: HabitLog[] = [
+  { habitId: 'dev-1', date: new Date().toISOString().split('T')[0], completed: true },
+  { habitId: 'dev-2', date: new Date().toISOString().split('T')[0], completed: false },
+  { habitId: 'dev-3', date: new Date().toISOString().split('T')[0], completed: true },
+  { habitId: 'dev-4', date: new Date().toISOString().split('T')[0], completed: false },
+  { habitId: 'dev-5', date: new Date().toISOString().split('T')[0], completed: true },
+];
+
 export function useHabits() {
-  const { user, isPreviewMode } = useAuth();
+  const { user, isPreviewMode, isDevMode } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -50,11 +67,16 @@ export function useHabits() {
 
   // Load from local cache first, then sync Firestore in background
   useEffect(() => {
+    if (isDevMode) {
+      setHabits(DEV_HABITS);
+      setLogs(DEV_LOGS);
+      setIsLoaded(true);
+      return;
+    }
+
     if (!user || isPreviewMode) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHabits(prev => prev.length > 0 ? [] : prev);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLogs(prev => prev.length > 0 ? [] : prev);
+      setHabits([]);
+      setLogs([]);
       setIsLoaded(true);
       return;
     }
@@ -137,7 +159,7 @@ export function useHabits() {
       unsubscribeHabits();
       unsubscribeLogs();
     };
-  }, [user, isPreviewMode, persistCache]);
+  }, [user, isPreviewMode, isDevMode, persistCache]);
 
   const addHabit = useCallback(async (name: string, type: HabitType) => {
     const id = crypto.randomUUID();
@@ -149,7 +171,7 @@ export function useHabits() {
       archived: false,
     };
     
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       setHabits(prev => [...prev, newHabit]);
       return id;
     }
@@ -161,10 +183,10 @@ export function useHabits() {
       userId: user.uid,
     });
     return id;
-  }, [user, isPreviewMode]);
+  }, [user, isPreviewMode, isDevMode]);
 
   const updateHabit = useCallback(async (id: string, updates: Partial<Habit>) => {
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       setHabits(prev => prev.map(h => h.id === id ? { ...h, ...updates } : h));
       return;
     }
@@ -173,10 +195,10 @@ export function useHabits() {
     
     const habitRef = doc(db, 'habits', id);
     await setDoc(habitRef, updates, { merge: true });
-  }, [user, isPreviewMode]);
+  }, [user, isPreviewMode, isDevMode]);
 
   const deleteHabit = useCallback(async (id: string) => {
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       setHabits(prev => prev.filter(h => h.id !== id));
       setLogs(prev => prev.filter(log => log.habitId !== id));
       return;
@@ -195,10 +217,10 @@ export function useHabits() {
       batch.delete(doc(db, 'logs', logId));
     });
     await batch.commit();
-  }, [user, logs, isPreviewMode]);
+  }, [user, logs, isPreviewMode, isDevMode]);
 
   const deleteAllHabits = useCallback(async () => {
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       setHabits([]);
       setLogs([]);
       return;
@@ -224,10 +246,10 @@ export function useHabits() {
     // Optimistic update
     setHabits([]);
     setLogs([]);
-  }, [user, habits, logs, isPreviewMode]);
+  }, [user, habits, logs, isPreviewMode, isDevMode]);
 
   const archiveHabit = useCallback(async (id: string) => {
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       setHabits(prev => prev.map(h => h.id === id ? { ...h, archived: true } : h));
       return;
     }
@@ -236,10 +258,10 @@ export function useHabits() {
     
     const habitRef = doc(db, 'habits', id);
     await setDoc(habitRef, { archived: true }, { merge: true });
-  }, [user, isPreviewMode]);
+  }, [user, isPreviewMode, isDevMode]);
 
   const unarchiveHabit = useCallback(async (id: string) => {
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       setHabits(prev => prev.map(h => h.id === id ? { ...h, archived: false } : h));
       return;
     }
@@ -248,7 +270,7 @@ export function useHabits() {
     
     const habitRef = doc(db, 'habits', id);
     await setDoc(habitRef, { archived: false }, { merge: true });
-  }, [user, isPreviewMode]);
+  }, [user, isPreviewMode, isDevMode]);
 
   const toggleHabitLog = useCallback(async (habitId: string, date: string): Promise<boolean> => {
     const existingLog = logs.find(log => log.habitId === habitId && log.date === date);
@@ -268,7 +290,7 @@ export function useHabits() {
       }
     });
 
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       return newCompleted;
     }
 
@@ -283,10 +305,10 @@ export function useHabits() {
     });
 
     return newCompleted;
-  }, [user, logs, isPreviewMode]);
+  }, [user, logs, isPreviewMode, isDevMode]);
 
   const setHabitLog = useCallback(async (habitId: string, date: string, completed: boolean) => {
-    if (isPreviewMode) {
+    if (isPreviewMode || isDevMode) {
       setLogs(prevLogs => {
         const existingIndex = prevLogs.findIndex(l => l.habitId === habitId && l.date === date);
         if (existingIndex >= 0) {
@@ -309,7 +331,7 @@ export function useHabits() {
       completed,
       userId: user.uid,
     });
-  }, [user, isPreviewMode]);
+  }, [user, isPreviewMode, isDevMode]);
 
   const getHabitLog = useCallback((habitId: string, date: string): boolean => {
     const log = logs.find(l => l.habitId === habitId && l.date === date);

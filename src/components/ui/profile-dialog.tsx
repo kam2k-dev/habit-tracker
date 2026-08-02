@@ -16,6 +16,7 @@ import { Upload, X, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLanguage } from "@/context/language-context";
+import { useSettings } from "@/context/settings-context";
 
 // Preset avatar options from local provided images
 const PRESET_AVATARS = [
@@ -43,6 +44,7 @@ interface ProfileDialogProps {
 
 export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: ProfileDialogProps) {
   const { t } = useLanguage();
+  const { swipeDirection, setSwipeDirection } = useSettings();
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(user?.photoURL || null);
   const [_uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -241,6 +243,32 @@ export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: Profile
           {/* Action Buttons - hidden when avatar settings open */}
           {!isAvatarSettingsOpen && (
             <div className="space-y-3">
+              {/* Swipe Direction Setting */}
+              <div className="space-y-2 rounded-xl border border-border bg-card/40 p-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold">{t('profile.swipeDirection')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('profile.swipeDirectionDesc')}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={swipeDirection === 'left' ? 'default' : 'outline'}
+                    onClick={() => setSwipeDirection('left')}
+                    className="flex-1"
+                  >
+                    {t('profile.swipeLeft')}
+                  </Button>
+                  <Button
+                    variant={swipeDirection === 'right' ? 'default' : 'outline'}
+                    onClick={() => setSwipeDirection('right')}
+                    className="flex-1"
+                  >
+                    {t('profile.swipeRight')}
+                  </Button>
+                </div>
+              </div>
+
               <Button
                 variant="outline"
                 onClick={() => setIsChangePasswordOpen(true)}

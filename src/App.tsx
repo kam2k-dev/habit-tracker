@@ -54,7 +54,7 @@ const ALL_DATES = generateDates();
 
 function App() {
   const { t, currentTranslations } = useLanguage();
-  const { user, loading: authLoading, isPreviewMode, logout, requestSignIn } = useAuth();
+  const { user, loading: authLoading, isPreviewMode, isDevMode, logout, requestSignIn, setDevMode } = useAuth();
   
   // Load custom avatar from localStorage on mount
   const [customAvatar, setCustomAvatar] = useState<string | null>(() => {
@@ -100,7 +100,7 @@ function App() {
     activeTabRef.current = activeTab;
   }, [activeTab]);
   
-  // Deteksi streak reset (Brian Tracy concept)
+  // Deteksi streak reset (Brian Tracy concept) - hanya untuk Good Habit
   useEffect(() => {
     if (!isLoaded || activeHabits.length === 0) return;
     
@@ -110,6 +110,9 @@ function App() {
       let updated = false;
 
       activeHabits.forEach(habit => {
+        // Hanya cek streak reset untuk Good Habit (abaikan Bad Habit)
+        if (habit.type !== 'good') return;
+
         const stats = getHabitStats(habit.id);
         // Jika streak 0 tapi pernah ada history
         if (stats.currentStreak === 0 && stats.totalCompleted > 0) {
@@ -285,7 +288,7 @@ function App() {
   }
 
   // Redirect to login if not authenticated and not in preview mode
-  if (!user && !isPreviewMode) {
+  if (!user && !isPreviewMode && !isDevMode) {
     return <Login />;
   }
 
@@ -849,6 +852,26 @@ function App() {
           setIsAddDialogOpen(true);
         }}
       />
+
+      {/* Dev Mode Toggle Button */}
+      {!isDevMode && (
+        <button
+          onClick={() => setDevMode(true)}
+          className="fixed bottom-28 right-4 z-[9999] px-3 py-1.5 rounded-full text-[10px] font-bold bg-purple-600 text-white shadow-xl hover:bg-purple-700 transition-colors pointer-events-auto"
+          title="Enter Dev Mode with dummy data"
+        >
+          DEV
+        </button>
+      )}
+      {isDevMode && (
+        <button
+          onClick={() => setDevMode(false)}
+          className="fixed bottom-28 right-4 z-[9999] px-3 py-1.5 rounded-full text-[10px] font-bold bg-amber-600 text-white shadow-xl hover:bg-amber-700 transition-colors pointer-events-auto"
+          title="Exit Dev Mode"
+        >
+          EXIT DEV
+        </button>
+      )}
 
       {/* Delete All Habits Confirmation Dialog */}
       <Dialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>
