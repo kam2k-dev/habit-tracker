@@ -98,27 +98,26 @@ export function FloatingBottomNav({
               onClick={() => onTabChange(item.id)}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="relative z-10 flex flex-col items-center justify-center w-[19%] h-full rounded-[24px] md:rounded-full group hover:rounded-full transition-all duration-300 overflow-hidden"
+              className="relative z-10 flex flex-col items-center justify-center w-[19%] h-full rounded-[24px] md:rounded-full group transition-all duration-300"
             >
               {/* iOS Glassmorphism Magnifying Pill Indicator */}
               {isActive && (
                 <motion.div
                   layoutId="activeTabPill"
-                  layout="position"
                   className={cn(
-                    "absolute inset-0 rounded-[24px] md:rounded-full -z-10 transition-all duration-300",
+                    "absolute inset-0 rounded-[24px] md:rounded-full -z-10",
                     /* Glass / Kaca Pembesar iOS Spec */
-                    "bg-white/80 dark:bg-white/20",
+                    "bg-white/80 dark:bg-white/25",
                     "backdrop-blur-2xl backdrop-saturate-[200%]",
-                    "border border-white/80 dark:border-white/30",
-                    "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1.5px_1px_rgba(255,255,255,0.9)]",
-                    "dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1.5px_1px_rgba(255,255,255,0.3)]"
+                    "border border-white/90 dark:border-white/30",
+                    "shadow-[0_8px_32px_rgba(0,0,0,0.14),inset_0_1.5px_1px_rgba(255,255,255,0.95)]",
+                    "dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1.5px_1px_rgba(255,255,255,0.35)]"
                   )}
                   transition={{
                     type: 'spring',
-                    stiffness: 420,
-                    damping: 32,
-                    mass: 0.7
+                    stiffness: 380,
+                    damping: 28,
+                    mass: 0.6
                   }}
                 />
               )}
