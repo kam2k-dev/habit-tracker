@@ -30,11 +30,11 @@ export function FloatingBottomNav({
 }: FloatingBottomNavProps) {
   const { t } = useLanguage();
   const items: NavItem[] = [
-    { id: 'today', label: t('tabs.today'), icon: HomeIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-blue-500 dark:text-blue-500' },
-    { id: 'good', label: t('tabs.good'), icon: GoodHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-emerald-500 dark:text-emerald-400' },
+    { id: 'today', label: t('tabs.today'), icon: HomeIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-foreground dark:text-white' },
+    { id: 'good', label: t('tabs.good'), icon: GoodHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-emerald-600 dark:text-emerald-400' },
     { id: 'add', label: '', icon: Plus },
-    { id: 'bad', label: t('tabs.bad'), icon: BadHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-rose-500 dark:text-rose-400' },
-    { id: 'stats', label: t('tabs.stats'), icon: TrendingIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-purple-500 dark:text-purple-400' },
+    { id: 'bad', label: t('tabs.bad'), icon: BadHabitIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-rose-600 dark:text-rose-400' },
+    { id: 'stats', label: t('tabs.stats'), icon: TrendingIcon, color: 'text-foreground/45 dark:text-white/45', activeColor: 'text-purple-600 dark:text-purple-400' },
   ];
 
   return (
@@ -100,17 +100,19 @@ export function FloatingBottomNav({
               aria-current={isActive ? 'page' : undefined}
               className="relative z-10 flex flex-col items-center justify-center w-[19%] h-full rounded-[24px] md:rounded-full group hover:rounded-full transition-all duration-300 overflow-hidden"
             >
-              {/* iOS Liquid Glass Sliding Pill Indicator (Instagram h-12 Fit) */}
+              {/* iOS Glassmorphism Magnifying Pill Indicator */}
               {isActive && (
                 <motion.div
                   layoutId="activeTabPill"
                   layout="position"
                   className={cn(
-                    "absolute inset-0 rounded-[24px] md:rounded-full -z-10 backdrop-blur-xl border border-transparent transition-colors duration-300",
-                    item.id === 'today' && "bg-blue-500/25 dark:bg-blue-500/35 shadow-[0_4px_20px_rgba(59,130,246,0.38)] dark:shadow-[0_4px_20px_rgba(59,130,246,0.48)]",
-                    item.id === 'good' && "bg-emerald-500/25 dark:bg-emerald-500/35 shadow-[0_4px_20px_rgba(16,185,129,0.38)] dark:shadow-[0_4px_20px_rgba(16,185,129,0.48)]",
-                    item.id === 'bad' && "bg-rose-500/25 dark:bg-rose-500/35 shadow-[0_4px_20px_rgba(244,63,94,0.38)] dark:shadow-[0_4px_20px_rgba(244,63,94,0.48)]",
-                    item.id === 'stats' && "bg-purple-500/25 dark:bg-purple-500/35 shadow-[0_4px_20px_rgba(168,85,247,0.38)] dark:shadow-[0_4px_20px_rgba(168,85,247,0.48)]"
+                    "absolute inset-0 rounded-[24px] md:rounded-full -z-10 transition-all duration-300",
+                    /* Glass / Kaca Pembesar iOS Spec */
+                    "bg-white/80 dark:bg-white/20",
+                    "backdrop-blur-2xl backdrop-saturate-[200%]",
+                    "border border-white/80 dark:border-white/30",
+                    "shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1.5px_1px_rgba(255,255,255,0.9)]",
+                    "dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1.5px_1px_rgba(255,255,255,0.3)]"
                   )}
                   transition={{
                     type: 'spring',
