@@ -853,24 +853,27 @@ function App() {
         }}
       />
 
-      {/* Dev Mode Toggle Button */}
-      {!isDevMode && (
-        <button
-          onClick={() => setDevMode(true)}
-          className="fixed bottom-28 right-4 z-[9999] px-3 py-1.5 rounded-full text-[10px] font-bold bg-purple-600 text-white shadow-xl hover:bg-purple-700 transition-colors pointer-events-auto"
-          title="Enter Dev Mode with dummy data"
-        >
-          DEV
-        </button>
-      )}
-      {isDevMode && (
-        <button
-          onClick={() => setDevMode(false)}
-          className="fixed bottom-28 right-4 z-[9999] px-3 py-1.5 rounded-full text-[10px] font-bold bg-amber-600 text-white shadow-xl hover:bg-amber-700 transition-colors pointer-events-auto"
-          title="Exit Dev Mode"
-        >
-          EXIT DEV
-        </button>
+      {/* Dev Mode Toggle Button (Development mode only) */}
+      {import.meta.env.DEV && (
+        <>
+          {!isDevMode ? (
+            <button
+              onClick={() => setDevMode(true)}
+              className="fixed bottom-28 right-4 z-[9999] px-3 py-1.5 rounded-full text-[10px] font-bold bg-purple-600 text-white shadow-xl hover:bg-purple-700 transition-colors pointer-events-auto"
+              title="Enter Dev Mode with dummy data"
+            >
+              DEV
+            </button>
+          ) : (
+            <button
+              onClick={() => setDevMode(false)}
+              className="fixed bottom-28 right-4 z-[9999] px-3 py-1.5 rounded-full text-[10px] font-bold bg-amber-600 text-white shadow-xl hover:bg-amber-700 transition-colors pointer-events-auto"
+              title="Exit Dev Mode"
+            >
+              EXIT DEV
+            </button>
+          )}
+        </>
       )}
 
       {/* Delete All Habits Confirmation Dialog */}
