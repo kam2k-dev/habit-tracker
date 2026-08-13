@@ -79,10 +79,10 @@ export function AllDoneState({ totalHabits: _totalHabits, onViewGoodHabits, onVi
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="flex items-center gap-2 mb-8 px-4 py-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-full"
+        className="flex items-start gap-2.5 mb-8 px-4 py-3 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-500/20 rounded-2xl max-w-xs sm:max-w-md w-full mx-auto"
       >
-        <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-        <span className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+        <Trophy className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        <span className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-medium leading-relaxed italic text-left">
           {t('allDone.quote')}
         </span>
       </motion.div>
@@ -92,12 +92,12 @@ export function AllDoneState({ totalHabits: _totalHabits, onViewGoodHabits, onVi
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="flex flex-col gap-3 w-full max-w-xs"
+        className="flex flex-row items-center justify-center gap-3 w-full max-w-xs"
       >
         <Button
           variant="outline"
           onClick={onViewGoodHabits}
-          className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full border border-emerald-500/20 bg-emerald-50/60 px-4 py-2 text-xs font-semibold text-emerald-700 transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10 active:scale-[0.97] dark:bg-emerald-950/20 dark:text-emerald-400 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/15"
+          className="group relative flex-1 items-center justify-center gap-2 overflow-hidden rounded-full border border-emerald-500/20 bg-emerald-50/60 px-4 py-2 text-xs font-semibold text-emerald-700 transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10 active:scale-[0.97] dark:bg-emerald-950/20 dark:text-emerald-400 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/15"
         >
           <span className="relative z-[1] whitespace-nowrap">{t('tabs.good')}</span>
           <ArrowRight className="h-3.5 w-3.5 shrink-0 text-emerald-600 transition-transform duration-300 group-hover:translate-x-0.5 dark:text-emerald-400" />
@@ -106,7 +106,7 @@ export function AllDoneState({ totalHabits: _totalHabits, onViewGoodHabits, onVi
         <Button
           variant="outline"
           onClick={onViewBadHabits}
-          className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full border border-rose-500/20 bg-rose-50/60 px-4 py-2 text-xs font-semibold text-rose-700 transition-all duration-300 hover:border-rose-500/40 hover:bg-rose-500/10 active:scale-[0.97] dark:bg-rose-950/20 dark:text-rose-400 dark:hover:border-rose-500/40 dark:hover:bg-rose-500/15"
+          className="group relative flex-1 items-center justify-center gap-2 overflow-hidden rounded-full border border-rose-500/20 bg-rose-50/60 px-4 py-2 text-xs font-semibold text-rose-700 transition-all duration-300 hover:border-rose-500/40 hover:bg-rose-500/10 active:scale-[0.97] dark:bg-rose-950/20 dark:text-rose-400 dark:hover:border-rose-500/40 dark:hover:bg-rose-500/15"
         >
           <span className="relative z-[1] whitespace-nowrap">{t('tabs.bad')}</span>
           <ArrowRight className="h-3.5 w-3.5 shrink-0 text-rose-600 transition-transform duration-300 group-hover:translate-x-0.5 dark:text-rose-400" />
