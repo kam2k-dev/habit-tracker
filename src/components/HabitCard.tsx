@@ -409,8 +409,8 @@ export function HabitCard({
                   disabled={!canToggle || isChecking}
                   className={`h-6 w-6 rounded-full border-2 habit-checkbox shrink-0 z-20 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${
                     isGood 
-                      ? 'data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 data-[state=checked]:shadow-[0_0_20px_rgba(16,185,129,0.7)]' 
-                      : 'data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500 data-[state=checked]:shadow-[0_0_20px_rgba(244,63,94,0.7)]'
+                      ? 'data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 dark:data-[state=checked]:bg-emerald-500 dark:data-[state=checked]:border-emerald-500 data-[state=checked]:shadow-[0_0_20px_rgba(16,185,129,0.7)]' 
+                      : 'data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500 dark:data-[state=checked]:bg-rose-500 dark:data-[state=checked]:border-rose-500 data-[state=checked]:shadow-[0_0_20px_rgba(244,63,94,0.7)]'
                   } ${isChecking ? 'opacity-70 scale-90' : 'opacity-100 hover:scale-110'}`}
                 />
               </motion.div>
