@@ -1,48 +1,48 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
 import * as crypto from 'crypto';
 
-// Inisialisasi Firebase Admin App secara modular & aman untuk ESM / Node runtime
-function getAdminAuth() {
-  if (!getApps().length) {
-    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+/**
+ * Membuat Firebase Custom Token murni menggunakan crypto Node.js & Google OAuth REST API
+ * (Bebas dari masalah konflik modul CommonJS/ESM jose/jwks-rsa di Vercel Serverless)
+ */
+function createCustomTokenDirect(uid: string, serviceAccount: any, claims: Record<string, any> = {}): string {
+  const header = {
+    alg: 'RS256',
+    typ: 'JWT',
+  };
 
-    if (serviceAccountKey) {
-      try {
-        let parsedKey = serviceAccountKey;
-        if (typeof serviceAccountKey === 'string') {
-          // Bersihkan jika ada bungkus kutip ganda atau newline escaped
-          let cleaned = serviceAccountKey.trim();
-          if (cleaned.startsWith("'") && cleaned.endsWith("'")) {
-            cleaned = cleaned.slice(1, -1);
-          }
-          parsedKey = JSON.parse(cleaned);
-        }
-        
-        // Handle format private key newline jika di-escape sebagai literal \n
-        if (parsedKey.private_key && typeof parsedKey.private_key === 'string') {
-          parsedKey.private_key = parsedKey.private_key.replace(/\\n/g, '\n');
-        }
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: serviceAccount.client_email,
+    sub: serviceAccount.client_email,
+    aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+    iat: now,
+    exp: now + 3600, // berlaku 1 jam
+    uid: uid,
+    claims: claims,
+  };
 
-        initializeApp({
-          credential: cert(parsedKey),
-        });
-      } catch (err) {
-        console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:', err);
-        initializeApp({ projectId });
-      }
-    } else {
-      initializeApp({ projectId });
-    }
-  }
+  const base64UrlEncode = (obj: any) =>
+    Buffer.from(JSON.stringify(obj))
+      .toString('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
 
-  return getAdminAuthFromApp();
-}
+  const unsignedToken = `${base64UrlEncode(header)}.${base64UrlEncode(payload)}`;
 
-function getAdminAuthFromApp() {
-  return getAuth();
+  const privateKey = serviceAccount.private_key.replace(/\\n/g, '\n');
+  const sign = crypto.createSign('RSA-SHA256');
+  sign.update(unsignedToken);
+  sign.end();
+
+  const signature = sign
+    .sign(privateKey, 'base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+
+  return `${unsignedToken}.${signature}`;
 }
 
 /**
@@ -125,6 +125,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
+  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  if (!serviceAccountKey) {
+    console.error('FIREBASE_SERVICE_ACCOUNT_KEY is not set in environment variables');
+    return res.status(500).json({ error: 'Firebase credentials missing' });
+  }
+
+  let serviceAccount: any;
+  try {
+    let cleaned = typeof serviceAccountKey === 'string' ? serviceAccountKey.trim() : serviceAccountKey;
+    if (typeof cleaned === 'string' && cleaned.startsWith("'") && cleaned.endsWith("'")) {
+      cleaned = cleaned.slice(1, -1);
+    }
+    serviceAccount = typeof cleaned === 'string' ? JSON.parse(cleaned) : cleaned;
+  } catch (parseErr) {
+    console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:', parseErr);
+    return res.status(500).json({ error: 'Invalid Firebase credentials format' });
+  }
+
   const { isValid, user } = verifyTelegramInitData(initData, botToken);
   if (!isValid || !user || !user.id) {
     return res.status(401).json({ error: 'Invalid or expired Telegram initData' });
@@ -134,30 +152,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const displayName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || 'Telegram User';
 
   try {
-    const adminAuth = getAdminAuth();
-
-    try {
-      await adminAuth.getUser(telegramUid);
-      await adminAuth.updateUser(telegramUid, {
-        displayName,
-        photoURL: user.photo_url || undefined,
-      });
-    } catch (authErr: any) {
-      if (authErr.code === 'auth/user-not-found') {
-        await adminAuth.createUser({
-          uid: telegramUid,
-          displayName,
-          photoURL: user.photo_url || undefined,
-        });
-      } else {
-        throw authErr;
-      }
-    }
-
-    const customToken = await adminAuth.createCustomToken(telegramUid, {
+    // Generate Custom Token murni dengan RSA-SHA256 bawaan Node.js
+    const customToken = createCustomTokenDirect(telegramUid, serviceAccount, {
       telegram: true,
       telegramId: String(user.id),
       username: user.username || null,
+      displayName,
+      photoURL: user.photo_url || null,
     });
 
     return res.status(200).json({
