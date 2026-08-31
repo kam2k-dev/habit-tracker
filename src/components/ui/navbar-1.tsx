@@ -12,6 +12,7 @@ import { useLanguage } from "@/context/language-context";
 
 interface Navbar1Props {
   user: {
+    uid?: string
     photoURL: string | null
     displayName: string | null
     email: string | null
@@ -84,8 +85,8 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
             ) : (
               <UserDropdown
                 user={{
-                  name: user.displayName || (user.uid.startsWith('telegram:') ? 'Telegram User' : user.email?.split('@')[0]) || 'User',
-                  email: user.email || (user.uid.startsWith('telegram:') ? '' : ''),
+                  name: user.displayName || (user.uid?.startsWith('telegram:') ? 'Telegram User' : user.email?.split('@')[0]) || 'User',
+                  email: user.email || '',
                   avatar: user.photoURL,
                   initials: (user.displayName || 'U').slice(0, 2).toUpperCase(),
                   status: 'online'
