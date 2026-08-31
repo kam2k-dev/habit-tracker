@@ -20,6 +20,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 import { useTelegram } from '@/hooks/useTelegram';
+import { toast } from 'sonner';
 
 // Dev mode user for testing without Firebase
 const DEV_USER: User = {

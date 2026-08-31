@@ -11,9 +11,21 @@ function getAdminAuth() {
 
     if (serviceAccountKey) {
       try {
-        const parsedKey = typeof serviceAccountKey === 'string'
-          ? JSON.parse(serviceAccountKey)
-          : serviceAccountKey;
+        let parsedKey = serviceAccountKey;
+        if (typeof serviceAccountKey === 'string') {
+          // Bersihkan jika ada bungkus kutip ganda atau newline escaped
+          let cleaned = serviceAccountKey.trim();
+          if (cleaned.startsWith("'") && cleaned.endsWith("'")) {
+            cleaned = cleaned.slice(1, -1);
+          }
+          parsedKey = JSON.parse(cleaned);
+        }
+        
+        // Handle format private key newline jika di-escape sebagai literal \n
+        if (parsedKey.private_key && typeof parsedKey.private_key === 'string') {
+          parsedKey.private_key = parsedKey.private_key.replace(/\\n/g, '\n');
+        }
+
         initializeApp({
           credential: cert(parsedKey),
         });
@@ -26,6 +38,10 @@ function getAdminAuth() {
     }
   }
 
+  return getAdminAuthFromApp();
+}
+
+function getAdminAuthFromApp() {
   return getAuth();
 }
 
