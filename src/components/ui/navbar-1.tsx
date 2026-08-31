@@ -43,10 +43,9 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
 
   return (
     <div 
-      className="sticky z-50 flex justify-center w-full px-4 transition-all"
+      className="sticky z-50 flex justify-center w-full px-4 transition-all mb-3 md:mb-4"
       style={{
         top: 'max(16px, env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))',
-        paddingTop: 'var(--tg-safe-area-inset-top, 0px)'
       }}
     >
       <div className="flex items-center justify-between px-4 md:px-6 py-2 md:py-2.5 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md rounded-full shadow-lg border border-border/50 w-full max-w-4xl relative">

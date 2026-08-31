@@ -514,7 +514,12 @@ function App() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-background">
+      <div 
+        className="min-h-screen bg-background transition-all"
+        style={{
+          paddingTop: 'max(16px, env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))',
+        }}
+      >
         <Navbar1
           user={currentUser ? { ...currentUser, photoURL: customAvatar || currentUser.photoURL } : null}
           activeHabitsCount={0}
@@ -525,7 +530,7 @@ function App() {
           onAvatarChange={setCustomAvatar}
           isPreviewMode={isPreviewMode}
         />
-        <main className="max-w-4xl mx-auto px-4 pt-8 pb-6 space-y-6">
+        <main className="max-w-4xl mx-auto px-4 pt-4 pb-6 space-y-6">
           {activeTab === 'stats' ? <StatsPageSkeleton /> : <TodayPageSkeleton />}
         </main>
       </div>
@@ -533,7 +538,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background transition-all"
+      style={{
+        paddingTop: 'max(16px, env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))',
+      }}
+    >
       <Toaster 
         position="top-center" 
         richColors 
@@ -558,7 +568,7 @@ function App() {
         isPreviewMode={isPreviewMode}
       />
 
-      <main className="max-w-4xl mx-auto px-4 pt-8 pb-6 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 pt-4 pb-6 space-y-6">
         {/* Daily Hero Section - Only show on Today tab */}
         {activeTab === 'today' && (
           <DailyHero 
