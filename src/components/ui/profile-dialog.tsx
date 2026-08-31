@@ -57,7 +57,8 @@ export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: Profile
   const [saveAvatarLoading, setSaveAvatarLoading] = useState(false);
   const [changePasswordError, setChangePasswordError] = useState<string | null>(null);
   const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
-  const { changePassword, setPassword, deleteAccount, isGoogleProvider } = useAuth();
+  const { changePassword, setPassword, deleteAccount, isGoogleProvider, getAuthProvider, telegramUsername } = useAuth();
+  const isTelegramUser = getAuthProvider() === 'telegram';
 
   // Sync selectedAvatar with user.photoURL when dialog opens or user changes
   useEffect(() => {
@@ -236,7 +237,14 @@ export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: Profile
             
             <div className="text-center">
               <p className="font-medium text-sm">{displayName}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              {isTelegramUser && (
+                <p className="text-xs text-[#24A1DE] font-medium">
+                  {telegramUsername ? `@${telegramUsername}` : 'Telegram User'}
+                </p>
+              )}
+              {!isTelegramUser && (
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              )}
             </div>
           </div>
 
@@ -269,13 +277,15 @@ export function ProfileDialog({ isOpen, onClose, user, onAvatarChange }: Profile
                 </div>
               </div>
 
-              <Button
-                variant="outline"
-                onClick={() => setIsChangePasswordOpen(true)}
-                className="w-full"
-              >
-                {isGoogleProvider ? "Set Password" : "Ubah Password"}
-              </Button>
+              {!isTelegramUser && (
+                <Button
+                  variant="outline"
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  className="w-full"
+                >
+                  {isGoogleProvider ? "Set Password" : "Ubah Password"}
+                </Button>
+              )}
               <Button
                 variant="destructive"
                 onClick={() => setIsDeleteAccountOpen(true)}

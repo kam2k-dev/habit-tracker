@@ -3,6 +3,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  signInWithCustomToken,
   signOut,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -18,6 +19,7 @@ import {
   type User,
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
+import { useTelegram } from '@/hooks/useTelegram';
 
 // Dev mode user for testing without Firebase
 const DEV_USER: User = {
@@ -44,18 +46,21 @@ export type ReauthPayload = {
   password?: string;
 };
 
-export type AuthProvider = 'email' | 'google' | 'unknown';
+export type AuthProvider = 'email' | 'google' | 'telegram' | 'unknown';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   isPreviewMode: boolean;
   isDevMode: boolean;
+  isTelegramUser: boolean;
+  telegramUsername: string | null;
   setPreviewMode: (val: boolean) => void;
   setDevMode: (val: boolean) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, pass: string) => Promise<void>;
   signUpWithEmail: (email: string, pass: string, name: string) => Promise<void>;
+  signInWithTelegram: () => Promise<void>;
   logout: () => Promise<void>;
   requestSignIn: () => void;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
@@ -70,12 +75,56 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { isTelegram, initData } = useTelegram();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPreviewMode, setIsPreviewMode] = useState(true);
   const [isDevMode, setIsDevMode] = useState(false);
   const [forceShowLogin, setForceShowLogin] = useState(false);
+  const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const isLoggingOut = useRef(false);
+  const telegramAuthAttempted = useRef(false);
+
+  // Auto sign-in if inside Telegram Mini App
+  useEffect(() => {
+    if (!isTelegram || !initData || telegramAuthAttempted.current) return;
+    telegramAuthAttempted.current = true;
+
+    async function authenticateTelegram() {
+      setLoading(true);
+      try {
+        const endpoint = import.meta.env.VITE_TELEGRAM_AUTH_URL || '/api/telegram-auth';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to authenticate Telegram user');
+        }
+
+        const data = await res.json();
+        if (data.customToken) {
+          if (data.user?.username) {
+            setTelegramUsername(data.user.username);
+          }
+          await signInWithCustomToken(auth, data.customToken);
+          setIsPreviewMode(false);
+          setForceShowLogin(false);
+        }
+      } catch (err) {
+        console.error('Telegram auto-login failed:', err);
+        // Fallback: stay on guest/preview mode inside Telegram if backend fails
+        setIsPreviewMode(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    authenticateTelegram();
+  }, [isTelegram, initData]);
 
   useEffect(() => {
     // Reset isLoggingOut on mount to prevent stuck loading state
@@ -120,6 +169,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    if (isTelegram) {
+      throw new Error('Login Google tidak didukung di dalam Telegram Mini App.');
+    }
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -140,6 +192,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       // Don't set loading false here because redirect might be happening 
       // or onAuthStateChanged will handle it for popup
+    }
+  };
+
+  const signInWithTelegram = async () => {
+    if (!initData) {
+      throw new Error('Telegram session data not found.');
+    }
+    setLoading(true);
+    try {
+      const endpoint = import.meta.env.VITE_TELEGRAM_AUTH_URL || '/api/telegram-auth';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Autentikasi Telegram gagal');
+      }
+
+      const data = await res.json();
+      if (data.customToken) {
+        if (data.user?.username) {
+          setTelegramUsername(data.user.username);
+        }
+        await signInWithCustomToken(auth, data.customToken);
+        setIsPreviewMode(false);
+        setForceShowLogin(false);
+      }
+    } catch (err) {
+      console.error('Error signing in with Telegram:', err);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -226,6 +313,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const getAuthProvider = (): AuthProvider => {
+    if (auth.currentUser?.uid.startsWith('telegram:')) return 'telegram';
     const providerId = auth.currentUser?.providerData[0]?.providerId;
     if (providerId === EmailAuthProvider.PROVIDER_ID) return 'email';
     if (providerId === GoogleAuthProvider.PROVIDER_ID) return 'google';
@@ -322,6 +410,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       isPreviewMode: isPreviewMode && !forceShowLogin,
       isDevMode,
+      isTelegramUser: Boolean(user?.uid.startsWith('telegram:') || isTelegram),
+      telegramUsername,
       setPreviewMode: (val: boolean) => {
         setIsPreviewMode(val);
         setForceShowLogin(!val);
@@ -331,6 +421,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithGoogle,
       signInWithEmail,
       signUpWithEmail,
+      signInWithTelegram,
       logout,
       requestSignIn,
       changePassword,

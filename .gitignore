@@ -29,9 +29,6 @@ Thumbs.db
 # Build output for deployment
 /dist
 
-# Capacitor & Android builds
-android/
-capacitor.config.ts
 .vercel/
 
 # Agent settings

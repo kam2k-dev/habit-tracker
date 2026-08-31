@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense, memo } from 'react';
 import { useHabits } from '@/hooks/useHabits';
 import { useAuth } from '@/hooks/useAuth';
+import { useTelegram } from '@/hooks/useTelegram';
 import { useLanguage } from '@/context/language-context';
 import { Navbar1 } from '@/components/ui/navbar-1';
 import { FloatingBottomNav } from '@/components/ui/floating-bottom-nav';
@@ -55,21 +56,24 @@ const ALL_DATES = generateDates();
 function App() {
   const { t, currentTranslations } = useLanguage();
   const { user, loading: authLoading, isPreviewMode, isDevMode, logout, requestSignIn, setDevMode } = useAuth();
+  const { triggerHapticImpact } = useTelegram();
+
+  const userKey = user?.uid || 'guest';
   
-  // Load custom avatar from localStorage on mount
+  // Load custom avatar from localStorage on mount (partitioned by UID)
   const [customAvatar, setCustomAvatar] = useState<string | null>(() => {
-    const saved = localStorage.getItem('customAvatar');
+    const saved = localStorage.getItem(`customAvatar:${userKey}`) || localStorage.getItem('customAvatar');
     return saved || null;
   });
   
   // Save custom avatar to localStorage when it changes
   useEffect(() => {
     if (customAvatar) {
-      localStorage.setItem('customAvatar', customAvatar);
+      localStorage.setItem(`customAvatar:${userKey}`, customAvatar);
     } else {
-      localStorage.removeItem('customAvatar');
+      localStorage.removeItem(`customAvatar:${userKey}`);
     }
-  }, [customAvatar]);
+  }, [customAvatar, userKey]);
 
 
 
@@ -105,7 +109,8 @@ function App() {
     if (!isLoaded || activeHabits.length === 0) return;
     
     try {
-      const notifiedResetsStr = localStorage.getItem('notifiedResets');
+      const resetCacheKey = `notifiedResets:${userKey}`;
+      const notifiedResetsStr = localStorage.getItem(resetCacheKey) || localStorage.getItem('notifiedResets');
       const notifiedResets = notifiedResetsStr ? JSON.parse(notifiedResetsStr) : {};
       let updated = false;
 
@@ -135,19 +140,19 @@ function App() {
       });
 
       if (updated) {
-        localStorage.setItem('notifiedResets', JSON.stringify(notifiedResets));
+        localStorage.setItem(resetCacheKey, JSON.stringify(notifiedResets));
       }
     } catch (e) {
       console.error("Error checking streak resets", e);
     }
-  }, [isLoaded, activeHabits, logs, getHabitStats, t]);
+  }, [isLoaded, activeHabits, logs, getHabitStats, t, userKey]);
   
   const [addHabitType, setAddHabitType] = useState<HabitType>('good');
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
   
-  // State for drag ordering in Today tab
+  // State for drag ordering in Today tab (partitioned by UID)
   const [todayOrder, setTodayOrder] = useState<string[]>(() => {
-    const saved = localStorage.getItem('todayHabitOrder');
+    const saved = localStorage.getItem(`todayHabitOrder:${userKey}`) || localStorage.getItem('todayHabitOrder');
     return saved ? JSON.parse(saved) : [];
   });
   
@@ -172,10 +177,10 @@ function App() {
   // Drag and drop state - MUST be before any early return
   const [draggedHabitId, setDraggedHabitId] = useState<string | null>(null);
   
-  // Save order to localStorage when it changes
+  // Save order to localStorage when it changes (partitioned by UID)
   useEffect(() => {
-    localStorage.setItem('todayHabitOrder', JSON.stringify(todayOrder));
-  }, [todayOrder]);
+    localStorage.setItem(`todayHabitOrder:${userKey}`, JSON.stringify(todayOrder));
+  }, [todayOrder, userKey]);
 
   // Clear pending/animating habits when leaving Today tab or habits change
   useEffect(() => {
@@ -351,10 +356,8 @@ function App() {
 
     // Add fade animation when completing (checking) a habit
     if (isCompleted && !wasCompleted) {
-      // Haptic feedback for successful completion
-      if (navigator.vibrate) {
-        navigator.vibrate(15);
-      }
+      // Haptic feedback for successful completion (Telegram native + navigator fallback)
+      triggerHapticImpact('medium');
       
       // Delay before starting fade animation:
       // - Today tab: 500ms to see checkmark + strikethrough before fading

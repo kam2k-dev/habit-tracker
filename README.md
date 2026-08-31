@@ -47,6 +47,7 @@ Habit Tracker adalah aplikasi web untuk membangun rutinitas positif sekaligus me
 
 - Preview Mode tanpa registrasi.
 - Firebase Authentication dengan Google dan email/password.
+- Integrasi Telegram Mini App (TMA) dengan auto login & token verification.
 - Penyimpanan data pengguna di Cloud Firestore.
 - Cache lokal untuk pengalaman yang lebih cepat.
 - Avatar profil bawaan maupun custom.
@@ -199,6 +200,20 @@ Firebase Web API key bukan pengganti autentikasi dan bukan private server key. K
 - Pembatasan API key pada Google Cloud Console bila diperlukan.
 - Tidak mengunggah service-account key atau kredensial admin ke frontend/repository.
 - Menyimpan konfigurasi deployment di environment platform masing-masing.
+
+## Deployment Telegram Mini App (Firebase)
+
+1. Buat bot via [@BotFather](https://t.me/botfather) dan simpan `BOT_TOKEN`.
+2. Masukkan secret bot token ke Firebase Functions:
+   ```bash
+   firebase functions:secrets:set TELEGRAM_BOT_TOKEN
+   ```
+3. Deploy fungsi backend dan frontend ke Firebase:
+   ```bash
+   npm run build
+   firebase deploy
+   ```
+4. Di BotFather, atur **Menu Button** atau **Main Mini App** dengan URL HTTPS hosting Anda (contoh: `https://your-project.web.app`).
 
 ## Roadmap
 
