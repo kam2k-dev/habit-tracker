@@ -517,7 +517,7 @@ function App() {
       <div 
         className="min-h-screen bg-background transition-all"
         style={{
-          paddingTop: 'max(16px, env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))',
+          paddingTop: 'calc(max(16px, env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px)) + 40px)',
         }}
       >
         <Navbar1
@@ -541,7 +541,7 @@ function App() {
     <div 
       className="min-h-screen bg-background transition-all"
       style={{
-        paddingTop: 'max(16px, env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px))',
+        paddingTop: 'calc(max(16px, env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px)) + 40px)',
       }}
     >
       <Toaster 
