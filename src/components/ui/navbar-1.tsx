@@ -84,8 +84,8 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
             ) : (
               <UserDropdown
                 user={{
-                  name: user.displayName || user.email?.split('@')[0] || 'User',
-                  email: user.email || '',
+                  name: user.displayName || (user.uid.startsWith('telegram:') ? 'Telegram User' : user.email?.split('@')[0]) || 'User',
+                  email: user.email || (user.uid.startsWith('telegram:') ? '' : ''),
                   avatar: user.photoURL,
                   initials: (user.displayName || 'U').slice(0, 2).toUpperCase(),
                   status: 'online'
@@ -185,8 +185,8 @@ const Navbar1 = ({ user, activeHabitsCount, onLogout, onRequestSignIn, onDeleteA
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{user.displayName}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="font-medium">{user.displayName || 'Telegram User'}</p>
+                      <p className="text-sm text-muted-foreground">{user.email || ''}</p>
                     </div>
                   </div>
                   <motion.button

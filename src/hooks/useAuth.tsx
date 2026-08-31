@@ -111,7 +111,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (data.user?.username) {
             setTelegramUsername(data.user.username);
           }
-          await signInWithCustomToken(auth, data.customToken);
+          const userCredential = await signInWithCustomToken(auth, data.customToken);
+          // Update profile Firebase Client langsung agar displayName & photoURL terisi instan
+          if (userCredential.user && (data.user?.displayName || data.user?.photoURL)) {
+            await updateProfile(userCredential.user, {
+              displayName: data.user.displayName || userCredential.user.displayName,
+              photoURL: data.user.photoURL || userCredential.user.photoURL,
+            }).catch(() => {});
+            // Update state user lokal agar re-render langsung menampilkan avatar dan nama
+            setUser({ ...userCredential.user });
+          }
           setIsPreviewMode(false);
           setForceShowLogin(false);
         }
@@ -223,7 +232,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.user?.username) {
           setTelegramUsername(data.user.username);
         }
-        await signInWithCustomToken(auth, data.customToken);
+        const userCredential = await signInWithCustomToken(auth, data.customToken);
+        if (userCredential.user && (data.user?.displayName || data.user?.photoURL)) {
+          await updateProfile(userCredential.user, {
+            displayName: data.user.displayName || userCredential.user.displayName,
+            photoURL: data.user.photoURL || userCredential.user.photoURL,
+          }).catch(() => {});
+          setUser({ ...userCredential.user });
+        }
         setIsPreviewMode(false);
         setForceShowLogin(false);
         toast.success('Berhasil login dengan Telegram!');
