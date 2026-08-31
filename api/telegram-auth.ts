@@ -1,27 +1,32 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import * as crypto from 'crypto';
 
-// Inisialisasi Firebase Admin SDK
-if (!admin.apps.length) {
-  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-  const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+// Inisialisasi Firebase Admin App secara modular & aman untuk ESM / Node runtime
+function getAdminAuth() {
+  if (!getApps().length) {
+    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
 
-  if (serviceAccountKey) {
-    try {
-      const parsedKey = typeof serviceAccountKey === 'string'
-        ? JSON.parse(serviceAccountKey)
-        : serviceAccountKey;
-      admin.initializeApp({
-        credential: admin.credential.cert(parsedKey),
-      });
-    } catch (err) {
-      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:', err);
-      admin.initializeApp({ projectId });
+    if (serviceAccountKey) {
+      try {
+        const parsedKey = typeof serviceAccountKey === 'string'
+          ? JSON.parse(serviceAccountKey)
+          : serviceAccountKey;
+        initializeApp({
+          credential: cert(parsedKey),
+        });
+      } catch (err) {
+        console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:', err);
+        initializeApp({ projectId });
+      }
+    } else {
+      initializeApp({ projectId });
     }
-  } else {
-    admin.initializeApp({ projectId });
   }
+
+  return getAuth();
 }
 
 /**
@@ -113,15 +118,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const displayName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || 'Telegram User';
 
   try {
+    const adminAuth = getAdminAuth();
+
     try {
-      await admin.auth().getUser(telegramUid);
-      await admin.auth().updateUser(telegramUid, {
+      await adminAuth.getUser(telegramUid);
+      await adminAuth.updateUser(telegramUid, {
         displayName,
         photoURL: user.photo_url || undefined,
       });
     } catch (authErr: any) {
       if (authErr.code === 'auth/user-not-found') {
-        await admin.auth().createUser({
+        await adminAuth.createUser({
           uid: telegramUid,
           displayName,
           photoURL: user.photo_url || undefined,
@@ -131,7 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    const customToken = await admin.auth().createCustomToken(telegramUid, {
+    const customToken = await adminAuth.createCustomToken(telegramUid, {
       telegram: true,
       telegramId: String(user.id),
       username: user.username || null,
@@ -147,7 +154,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
     });
   } catch (err: any) {
-    console.error('Failed to create Firebase custom token:', err);
+    console.error('Failed to create Firebase custom token in Vercel:', err);
     return res.status(500).json({ error: 'Failed to generate authentication token' });
   }
 }

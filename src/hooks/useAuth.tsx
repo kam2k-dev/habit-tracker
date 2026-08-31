@@ -196,7 +196,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithTelegram = async () => {
-    if (!initData) {
+    const currentInitData = initData || window.Telegram?.WebApp?.initData;
+    if (!currentInitData) {
+      toast.error('Data sesi Telegram tidak ditemukan.');
       throw new Error('Telegram session data not found.');
     }
     setLoading(true);
@@ -205,12 +207,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ initData }),
+        body: JSON.stringify({ initData: currentInitData }),
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Autentikasi Telegram gagal');
+        const msg = errData.error || `Error ${res.status}: Autentikasi Telegram gagal`;
+        toast.error(msg);
+        throw new Error(msg);
       }
 
       const data = await res.json();
@@ -221,9 +225,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await signInWithCustomToken(auth, data.customToken);
         setIsPreviewMode(false);
         setForceShowLogin(false);
+        toast.success('Berhasil login dengan Telegram!');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error signing in with Telegram:', err);
+      toast.error(err.message || 'Gagal masuk dengan Telegram');
       throw err;
     } finally {
       setLoading(false);
