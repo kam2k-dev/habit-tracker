@@ -27,9 +27,27 @@ export function useTelegram() {
         setColorScheme(tg.colorScheme || 'light');
       };
 
+      const handleSafeAreaChange = () => {
+        if (typeof document !== 'undefined') {
+          const topInset = tg.safeAreaInset?.top || tg.contentSafeAreaInset?.top || 0;
+          const bottomInset = tg.safeAreaInset?.bottom || tg.contentSafeAreaInset?.bottom || 0;
+          document.documentElement.style.setProperty('--tg-safe-area-inset-top', `${topInset}px`);
+          document.documentElement.style.setProperty('--tg-safe-area-inset-bottom', `${bottomInset}px`);
+        }
+      };
+
+      handleSafeAreaChange();
+
       tg.onEvent('themeChanged', handleThemeChange);
+      tg.onEvent('safeAreaChanged', handleSafeAreaChange);
+      tg.onEvent('contentSafeAreaChanged', handleSafeAreaChange);
+      tg.onEvent('fullscreenChanged', handleSafeAreaChange);
+
       return () => {
         tg.offEvent('themeChanged', handleThemeChange);
+        tg.offEvent('safeAreaChanged', handleSafeAreaChange);
+        tg.offEvent('contentSafeAreaChanged', handleSafeAreaChange);
+        tg.offEvent('fullscreenChanged', handleSafeAreaChange);
       };
     }
   }, []);

@@ -4,6 +4,10 @@
 
 @layer base {
   :root {
+    --tg-safe-area-inset-top: 0px;
+    --tg-safe-area-inset-bottom: 0px;
+    --tg-content-safe-area-inset-top: 0px;
+    --tg-content-safe-area-inset-bottom: 0px;
     --background: 60 5% 96%; /* stone-50 */
     --foreground: 24 10% 10%; /* stone-900 */
     --card: 0 0% 100%;

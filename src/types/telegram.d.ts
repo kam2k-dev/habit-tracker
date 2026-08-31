@@ -35,6 +35,13 @@ export interface TelegramThemeParams {
   destructive_text_color?: string;
 }
 
+export interface TelegramSafeAreaInset {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
 export interface TelegramHapticFeedback {
   impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
   notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
@@ -49,6 +56,9 @@ export interface TelegramWebApp {
   colorScheme: 'light' | 'dark';
   themeParams: TelegramThemeParams;
   isExpanded: boolean;
+  isFullscreen?: boolean;
+  safeAreaInset?: TelegramSafeAreaInset;
+  contentSafeAreaInset?: TelegramSafeAreaInset;
   viewportHeight: number;
   viewportStableHeight: number;
   headerColor: string;
